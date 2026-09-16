@@ -7,9 +7,9 @@
 @import 'utilities/booking.css' layer(utilities);
 @import 'utilities/confirmation.css' layer(utilities);
 @import 'utilities/home.css' layer(utilities);
-@import 'utilities/trains.css' layer(utilities);
-@import 'utilities/trip-detail.css' layer(utilities);
-@import 'utilities/trips.css' layer(utilities);
+@import 'utilities/route-detail.css' layer(utilities);
+@import 'utilities/routes.css' layer(utilities);
+@import 'utilities/scenarios.css' layer(utilities);
 
 @import 'components/content-grid.css' layer(components);
 @import 'components/columns-grid.css' layer(components);

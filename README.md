@@ -22,8 +22,8 @@ These skills define professional software engineering. Most developers spend 80%
 ## Who is this for?
 
 - **Students**: This project was created for university-level software development courses, but anyone learning web development is welcome to use it
-- **Self-learners**: Found this repo on your own? Great! Work through the refactors at your own pace
-- **Educators**: Feel free to incorporate these exercises into your curriculum
+- **Self-learners**: Found this repo on your own? Great! Work through the scenarios at your own pace
+- **Educators**: Feel free to incorporate these scenarios into your curriculum
 
 ## Why Brownfield Development?
 
@@ -35,12 +35,12 @@ Greenfield tutorials teach you syntax. Brownfield projects teach you engineering
 
 **This codebase contains intentional technical debt.** You'll find suboptimal architecture, missing error handling, inconsistent patterns, and code that needs refactoring—all by design. These are learning opportunities, not mistakes.
 
-**Do not submit PRs to fix code issues.** The technical debt, bugs, and architectural issues are intentional teaching moments for developers working through the exercises.
+**Do not submit PRs to fix code issues.** The technical debt, bugs, and architectural issues are intentional teaching moments for developers working through the scenarios.
 
 **However**, if you find:
 - Actual errors that break the learning experience
-- Typos in documentation
-- Ideas for new challenges
+- Typos in documentation or scenario descriptions
+- Ideas for new scenarios or challenges
 
 Please open an issue or submit a PR! Contributions to improve the educational value are welcome.
 
@@ -58,27 +58,15 @@ This repository is set up as a **GitHub template**. Use the template feature to 
    git clone https://github.com/YOUR-USERNAME/YOUR-REPO-NAME.git
    cd YOUR-REPO-NAME
    ```
-5. Install dependencies: `npm install`
-6. Copy `.env.example` to `.env` and set `MONGODB_URI` (and optionally `MONGODB_DB_NAME`) for your MongoDB instance.
-7. Import the starter data with `npm run db:import`. This replaces the starter collections and clears any confirmations in that database.
-8. Run the automated tests with `npm test`. Tests use a temporary local database and do not change the database in your `.env` file.
-9. Start the development server: `npm run dev`
+5. Install dependencies: `pnpm install`
+6. Start the development server: `pnpm run dev`
+7. Visit `/scenarios` to see available development challenges
 
-The first test run may take longer because MongoDB Memory Server needs to download a MongoDB program. Later test runs reuse that download. Use `npm run test:watch` if you want Vitest to rerun related tests while you work.
-
-### Automated Test Setup
-
-The application and automated tests share the database initialization function in `src/db/initialize.js`. The normal `db:import` command runs it against the database configured in `.env`. Automated tests run it against a temporary MongoDB database instead.
-
-Vitest starts the temporary database once for the complete test run. Before each individual test, the setup clears that temporary database and restores the starter data. This means each test begins with the same data, and test changes cannot reach the database configured in `.env`.
-
-See `tests/trains.test.js` for example endpoint tests that use Supertest to send requests to the real `/api/trains` route.
-
-This project simulates realistic work situations requiring reverse engineering, refactoring, debugging, or feature extension.
+Each scenario simulates realistic work situations requiring reverse engineering, refactoring, debugging, or feature extension.
 
 ### For Contributors
 
-If you want to contribute improvements to the documentation or educational content itself:
+If you want to contribute improvements to the challenge scenarios, documentation, or educational content itself:
 
 1. **Fork** this repository (not "Use this template")
 2. Create a feature branch for your changes
@@ -91,8 +79,7 @@ Forking maintains the connection to the original repository and allows you to co
 - **Backend**: Node.js with Express framework
 - **Templating**: EJS
 - **Styling**: Modern nested CSS with custom properties
-- **Database**: MongoDB, using the official MongoDB Node.js driver
-- **Testing**: Vitest, Supertest, and MongoDB Memory Server
+- **Database**: JSON-based data store, pretending to be a relational database
 
 ## Skills You'll Develop
 

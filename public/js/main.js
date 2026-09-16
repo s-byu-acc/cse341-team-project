@@ -34,62 +34,63 @@ const hookSeasonSorter = () => {
     }
 };
 
-const hookTrainsCatalog = async () => {
-    const listEl = document.getElementById('trains-list');
-    const templateEl = document.getElementById('train-card-template');
-    const loadingEl = document.getElementById('trains-loading');
-    const errorEl = document.getElementById('trains-error');
-
-    if (!listEl || !templateEl) {
-        return;
-    }
-
+const hookScenarioTasks = () => {
+    const storageKey = 'kizuna-scenario-tasks';
+    const pageUrl = window.location.pathname;
+    const tasks = document.querySelectorAll('.scenario-tasks .task-item');
+    
+    // Load all scenario data from localStorage
+    let allScenarios = {};
     try {
-        const response = await fetch('/api/trains');
-        if (!response.ok) {
-            throw new Error(`Failed to load trains (${response.status})`);
-        }
-
-        const payload = await response.json();
-        const trains = payload.trains || [];
-        const fragment = document.createDocumentFragment();
-
-        trains.forEach((train) => {
-            const card = templateEl.content.cloneNode(true);
-            const imageEl = card.querySelector('[data-field="image"]');
-
-            imageEl.src = train.imageUrl;
-            imageEl.alt = train.imageAlt || `${train.name} train`;
-
-            card.querySelector('[data-field="name"]').textContent = train.name;
-            card.querySelector('[data-field="operator"]').textContent = train.operator;
-            card.querySelector('[data-field="type"]').textContent = train.type;
-            card.querySelector('[data-field="speed"]').textContent = `${train.maxSpeedKmh} km/h`;
-            card.querySelector('[data-field="seats"]').textContent = `${train.capacity} seats`;
-            card.querySelector('[data-field="power"]').textContent = train.powerSource;
-            card.querySelector('[data-field="description"]').textContent = train.description;
-            card.querySelector('[data-field="best-for"]').textContent = train.bestFor;
-
-            fragment.appendChild(card);
-        });
-
-        listEl.replaceChildren(fragment);
-        if (loadingEl) {
-            loadingEl.hidden = true;
-        }
-    } catch (error) {
-        if (loadingEl) {
-            loadingEl.hidden = true;
-        }
-        if (errorEl) {
-            errorEl.hidden = false;
-            errorEl.textContent = 'Unable to load trains right now. Please try again in a moment.';
-        }
+        const stored = localStorage.getItem(storageKey);
+        allScenarios = stored ? JSON.parse(stored) : {};
+    } catch (e) {
+        allScenarios = {};
     }
+    
+    // Get completed tasks for this specific page
+    let completedTasks = allScenarios[pageUrl] || [];
+    
+    // Get all valid task IDs currently on the page
+    const validTaskIds = [];
+    tasks.forEach((task) => {
+        const checkbox = task.querySelector('input[type="checkbox"]');
+        if (checkbox && checkbox.id) {
+            validTaskIds.push(checkbox.id);
+        }
+    });
+    
+    // Clean up: remove task IDs that no longer exist on this page
+    completedTasks = completedTasks.filter(id => validTaskIds.includes(id));
+    allScenarios[pageUrl] = completedTasks;
+    localStorage.setItem(storageKey, JSON.stringify(allScenarios));
+    
+    // Check off tasks that were previously completed
+    tasks.forEach((task) => {
+        const checkbox = task.querySelector('input[type="checkbox"]');
+        if (!checkbox || !checkbox.id) return;
+        
+        if (completedTasks.includes(checkbox.id)) {
+            checkbox.checked = true;
+        }
+        
+        // Listen for changes and update localStorage
+        checkbox.addEventListener('change', () => {
+            if (checkbox.checked) {
+                if (!completedTasks.includes(checkbox.id)) {
+                    completedTasks.push(checkbox.id);
+                }
+            } else {
+                completedTasks = completedTasks.filter(id => id !== checkbox.id);
+            }
+            allScenarios[pageUrl] = completedTasks;
+            localStorage.setItem(storageKey, JSON.stringify(allScenarios));
+        });
+    });
 };
 
 document.addEventListener('DOMContentLoaded', () => {
     hookRegionSorter();
     hookSeasonSorter();
-    hookTrainsCatalog();
+    hookScenarioTasks();
 });

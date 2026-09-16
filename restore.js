@@ -134,8 +134,4 @@ async function main() {
     }
 }
 
-try {
-    await main();
-} catch (error) {
-    console.error(error);
-}
+main().catch(console.error);

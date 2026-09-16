@@ -1,11 +1,11 @@
-import { getDb } from '../db/connect.js';
+import { getConfirmationById } from '../models/model.js';
 
 export default async (req, res) => {
     const { confirmationId } = req.params;
 
-    const confirmation = await getDb().collection('confirmations').findOne({ id: confirmationId });
+    const confirmation = await getConfirmationById(confirmationId);
 
-    res.render('trips/confirm', {
+    res.render('routes/confirm', {
         title: 'Trip Confirmation',
         confirmation
     });
