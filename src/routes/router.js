@@ -1,5 +1,5 @@
-import railTripsRouter from './trips.js';
-import { trainsApi, trainsPage } from './trains.js';
+import challengeScenariosRouter from './scenarios.js';
+import railRoutesRouter from './routes.js';
 import { Router } from 'express';
 import { homePage, aboutPage, testErrorPage } from './index.js';
 
@@ -11,14 +11,11 @@ router.get('/', homePage);
 // About page
 router.get('/about', aboutPage);
 
-// Trains page
-router.get('/trains', trainsPage);
+// Rail routes
+router.use('/routes', railRoutesRouter);
 
-// Trains API
-router.get('/api/trains', trainsApi);
-
-// Rail trips
-router.use('/trips', railTripsRouter);
+// Challenge scenarios
+router.use('/scenarios', challengeScenariosRouter);
 
 // Test 500 error page
 router.get('/500', testErrorPage);

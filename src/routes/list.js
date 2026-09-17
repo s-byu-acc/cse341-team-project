@@ -1,17 +1,14 @@
-import { getDb } from '../db/connect.js';
+import { getAllRoutes, getListOfRegions, getListOfSeasons } from '../models/model.js';
 
 export default async (req, res) => {
-    const db = getDb();
-    const [regions, trips, seasons] = await Promise.all([
-        db.collection('trips').distinct('region'),
-        db.collection('trips').find({}).toArray(),
-        db.collection('trips').distinct('bestSeason')
-    ]);
+    const regions = await getListOfRegions();
+    const routes = await getAllRoutes();
+    const seasons = await getListOfSeasons();
 
-    res.render('trips/list', {
-        title: 'Scenic Train Trips',
+    res.render('routes/list', { 
+        title: 'Scenic Train Routes',
         regions,
-        trips,
+        routes,
         seasons
     });
 };
