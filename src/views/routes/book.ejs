@@ -202,6 +202,46 @@
     const pricePerTicket = document.getElementById('pricePerTicket');
     const totalAmount = document.getElementById('totalAmount');
 
+    const updateTicketAvailability = async (day) => {
+        try {
+            const response = await fetch(`/api/ticket-classes?day=${encodeURIComponent(day)}`);
+            if (!response.ok) throw new Error(`Ticket classes request failed: ${response.status}`);
+
+            const availableClasses = await response.json();
+            const availableClassNames = new Set(availableClasses.map((ticket) => ticket.class.toLowerCase()));
+            let selectedRadio = null;
+
+            ticketRadios.forEach((radio) => {
+                const isAvailable = availableClassNames.has(radio.value.toLowerCase());
+                const ticketCard = radio.closest('.ticket-card');
+
+                radio.disabled = !isAvailable;
+                radio.setAttribute('aria-disabled', String(!isAvailable));
+                ticketCard.classList.toggle('unavailable', !isAvailable);
+
+                if (isAvailable && radio.checked) selectedRadio = radio;
+            });
+
+            if (!selectedRadio) {
+                selectedRadio = [...ticketRadios].find((radio) => !radio.disabled) || null;
+                ticketRadios.forEach((radio) => {
+                    radio.checked = radio === selectedRadio;
+                });
+            }
+
+            if (selectedRadio) {
+                selectedTicketName.textContent = selectedRadio.dataset.name;
+                ticketPrice = parseInt(selectedRadio.dataset.price, 10);
+            } else {
+                selectedTicketName.textContent = 'Unavailable';
+                ticketPrice = 0;
+            }
+            updateSummary();
+        } catch (error) {
+            console.error('Unable to update ticket availability:', error);
+        }
+    };
+
     const updateSummary = () => {
         passengerCountDisplay.textContent = passengerCount;
         pricePerTicket.textContent = `¥${ticketPrice.toLocaleString()}`;
@@ -388,20 +428,14 @@
 
     // Event Listeners
     selectedDayLabels.forEach((label) => {
-        label.addEventListener('click', (e) => {
-            e.preventDefault();
-            const label = e.currentTarget;
+        const dayInput = label.querySelector('input[name="selectedDay"]');
 
-            // Update visual and input selection
-            selectedDayLabels.forEach((lbl) => {
-                lbl.classList.remove('selected');
-                lbl.querySelector('input').checked = false;
-                lbl.querySelector('input').removeAttribute('checked');
+        dayInput.addEventListener('change', (event) => {
+            selectedDayLabels.forEach((dayLabel) => {
+                dayLabel.classList.toggle('selected', dayLabel === label);
             });
 
-            label.classList.add('selected');
-            label.querySelector('input').checked = true;
-            label.querySelector('input').setAttribute('checked', true);
+            updateTicketAvailability(event.target.value);
         });
     });
 
@@ -448,9 +482,12 @@
     if (selectedRadio) {
         const ticketName = selectedRadio.dataset.name;
         selectedTicketName.textContent = ticketName;
-        ticketPrice = parseInt(selectedRadio.dataset.price);
+        ticketPrice = parseInt(selectedRadio.dataset.price, 10);
     }
     updateSummary();
+
+    const initialDay = document.querySelector('input[name="selectedDay"]:checked');
+    if (initialDay) updateTicketAvailability(initialDay.value);
 </script>
 
 <%- include('../partials/footer') %>
