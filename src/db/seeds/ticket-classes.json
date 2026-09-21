@@ -1,6 +1,7 @@
 [
     {
         "class": "standard",
+        "availableDays": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
         "name": "Standard Class",
         "pricePerKm": 80,
         "amenities": [
@@ -12,6 +13,7 @@
     },
     {
         "class": "premium",
+        "availableDays": ["monday", "tuesday", "wednesday", "thursday", "friday"],
         "name": "Premium Class",
         "pricePerKm": 150,
         "amenities": [
@@ -24,6 +26,7 @@
     },
     {
         "class": "first",
+        "availableDays": ["saturday", "sunday"],
         "name": "First Class",
         "pricePerKm": 250,
         "amenities": [

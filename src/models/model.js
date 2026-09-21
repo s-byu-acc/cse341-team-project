@@ -166,7 +166,9 @@ export const getTicketOptionsForRoute = async (routeId) => {
     const route = await getRouteById(routeId);
     if (!route) return null;
 
-    return db().ticketClasses.map(tc => ({
+    const ticketClasses = await getAllTicketClasses();
+
+    return ticketClasses.map(tc => ({
         class: tc.class,
         name: tc.name,
         price: route.distance * tc.pricePerKm,
