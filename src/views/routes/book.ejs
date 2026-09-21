@@ -216,6 +216,7 @@
                 const ticketCard = radio.closest('.ticket-card');
 
                 radio.disabled = !isAvailable;
+                radio.setAttribute('aria-disabled', String(!isAvailable));
                 ticketCard.classList.toggle('unavailable', !isAvailable);
 
                 if (isAvailable && radio.checked) selectedRadio = radio;
@@ -427,21 +428,14 @@
 
     // Event Listeners
     selectedDayLabels.forEach((label) => {
-        label.addEventListener('click', (e) => {
-            e.preventDefault();
-            const label = e.currentTarget;
+        const dayInput = label.querySelector('input[name="selectedDay"]');
 
-            // Update visual and input selection
-            selectedDayLabels.forEach((lbl) => {
-                lbl.classList.remove('selected');
-                lbl.querySelector('input').checked = false;
-                lbl.querySelector('input').removeAttribute('checked');
+        dayInput.addEventListener('change', (event) => {
+            selectedDayLabels.forEach((dayLabel) => {
+                dayLabel.classList.toggle('selected', dayLabel === label);
             });
 
-            label.classList.add('selected');
-            label.querySelector('input').checked = true;
-            label.querySelector('input').setAttribute('checked', true);
-            updateTicketAvailability(label.querySelector('input').value);
+            updateTicketAvailability(event.target.value);
         });
     });
 

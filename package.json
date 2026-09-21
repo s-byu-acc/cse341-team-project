@@ -7,8 +7,10 @@
 	},
 	"scripts": {
 		"dev": "nodemon --env-file=.env server.js",
+		"db:seed": "node --env-file=.env src/db/import.js",
+		"db:test": "node --env-file=.env scripts/test-db.js",
 		"reset": "node restore.js 3000 3001",
-		"start": "node server.js"
+		"start": "node --env-file=.env server.js"
 	},
 	"type": "module",
 	"version": "1.0.0",
