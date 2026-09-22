@@ -3,8 +3,10 @@ import schedules from './seeds/schedules.json' with { type: 'json' };
 import stations from './seeds/stations.json' with { type: 'json' };
 import ticketClasses from './seeds/ticket-classes.json' with { type: 'json' };
 import trains from './seeds/trains.json' with { type: 'json' };
+import routes from '../models/seeds/routes.json' with { type: 'json' };
 
 const starterCollections = [
+  ['routes', routes],
   ['trips', trips],
   ['schedules', schedules],
   ['stations', stations],
