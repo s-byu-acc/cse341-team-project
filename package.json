@@ -3,19 +3,25 @@
 	"dependencies": {
 		"ejs": "^3.1.10",
 		"express": "^5.1.0",
-		"mongoose": "^9.10.1"
+		"mongoose": "^9.10.1",
+		"mongodb": "^7.1.0",
+		"swagger-ui-express": "^5.0.1"
 	},
 	"scripts": {
-		"dev": "nodemon --env-file=.env server.js",
+		"dev": "nodemon",
 		"db:seed": "node --env-file=.env src/db/import.js",
-		"db:test": "node --env-file=.env scripts/test-db.js",
 		"reset": "node restore.js 3000 3001",
-		"start": "node --env-file=.env server.js"
+		"start": "node --env-file=.env server.js",
+		"lint": "eslint .",
+		"lint:fix": "eslint . --fix",
+		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"type": "module",
 	"version": "1.0.0",
 	"devDependencies": {
+		"eslint": "^10.11.0",
 		"nodemon": "^3.1.10",
+		"swagger-jsdoc": "^6.3.0",
 		"ws": "^8.18.3"
 	}
 }
