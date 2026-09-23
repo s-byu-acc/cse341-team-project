@@ -1,9 +1,12 @@
 import challengeScenariosRouter from './scenarios.js';
 import railRoutesRouter from './routes.js';
+import apiRouter from './api-routes.js';
 import { Router } from 'express';
 import { homePage, aboutPage, testErrorPage } from './index.js';
 
 const router = Router();
+
+router.use('/api', apiRouter);
 
 // Home page
 router.get('/', homePage);
