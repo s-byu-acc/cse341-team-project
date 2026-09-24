@@ -1,0 +1,30 @@
+<%- include('partials/header') %>
+
+    <main class="container my-4">
+        <h1>
+            <%= title %>
+        </h1>
+        <p>Live database bookings updated via client API fetches.</p>
+
+        <div id="loading" class="alert alert-info">Loading bookings...</div>
+        <div id="error-message" class="alert alert-danger d-none">To load bookings data.</div>
+
+        <table class="table table-striped d-none" id="bookingsTable">
+            <thead>
+                <tr>
+                    <th>Booking Code</th>
+                    <th>Schedule ID</th>
+                    <th>Route ID</th>
+                    <th>Ticket Class</th>
+                    <th>Day</th>
+                    <th>Passengers</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody id="bookingsTableBody">
+                <!--To be populated dynamically via public/js/main.js -->
+            </tbody>
+        </table>
+    </main>
+
+    <%- include('partials/footer') %>

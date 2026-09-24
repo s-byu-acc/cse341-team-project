@@ -1,22 +1,34 @@
-import { bookingPage, processBookingRequest } from './book.js';
-import confirmationPage from './confirm.js';
-import listRoutesPage from './list.js';
-import routeDetailsPage from './details.js';
 import { Router } from 'express';
+
+// Import existing route handlers
+import listRoutes from './list.js';
+import routeDetails from './details.js';
+
+// Import booking controllers
+import {
+  getAllBookings,
+  bookingPage,
+  processBookingRequest,
+  confirmationPage,
+  bookingsAdminPage,
+} from '../controllers/bookings.js';
 
 const router = Router();
 
-// List all routes
-router.get('/', listRoutesPage);
+// 1. List all train routes (/routes)
+router.get('/', listRoutes);
 
-// Route details page
-router.get('/:routeId', routeDetailsPage);
-
-// Book ticket
+// 2.EJS View Routes: Booking flow static routes
 router.get('/booking/:scheduleId', bookingPage);
 router.post('/book', processBookingRequest);
+router.get('/confirmation/:bookingCode', confirmationPage);
 
-// Booking confirmation page
-router.get('/confirmation/:confirmationId', confirmationPage);
+// 3. Admin & Swagger API endpoints
+router.get('/bookings-admin', bookingsAdminPage);
+router.get('/api/bookings', getAllBookings);
+
+// 4. Dynamic route detail page such as /routes/alpine-panorama.
+//Remain at the bottom so static paths above are checked first!
+router.get('/:routeId', routeDetails);
 
 export default router;

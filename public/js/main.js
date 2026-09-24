@@ -94,3 +94,47 @@ document.addEventListener('DOMContentLoaded', () => {
     hookSeasonSorter();
     hookScenarioTasks();
 });
+
+//WEEK03: FEATURE-SET-03: SCRIPT FOR CLIENT-SERVER SIDE RENDERING
+ document.addEventListener('DOMContentLoaded', async () => {
+  const tableEl = document.getElementById('bookingsTable');
+  
+  // Guard clause: Only run this script if the admin table exists on the page
+  if (!tableEl) return;
+
+  const loadingEl = document.getElementById('loading');
+  const errorEl = document.getElementById('error-message');
+  const tbodyEl = document.getElementById('bookingsTableBody');
+
+  try {
+    const response = await fetch('/api/bookings');
+    if (!response.ok) throw new Error('Network error fetching bookings');
+
+    const bookings = await response.json();
+    loadingEl.classList.add('d-none');
+
+    if (bookings.length === 0) {
+      loadingEl.textContent = 'No bookings found in database.';
+      loadingEl.classList.remove('d-none');
+      return;
+    }
+
+    tbodyEl.innerHTML = bookings.map(b => `
+      <tr>
+        <td><strong>${b.bookingCode || 'N/A'}</strong></td>
+        <td>${b.scheduleId}</td>
+        <td>${b.routeId}</td>
+        <td><span class="badge bg-secondary">${b.ticketClass}</span></td>
+        <td>${b.selectedDay}</td>
+        <td>${b.passengers ? b.passengers.length : 0} passenger(s)</td>
+        <td>${new Date(b.createdAt).toLocaleDateString()}</td>
+      </tr>
+    `).join('');
+
+    tableEl.classList.remove('d-none');
+  } catch (err) {
+    console.error(err);
+    if (loadingEl) loadingEl.classList.add('d-none');
+    if (errorEl) errorEl.classList.remove('d-none');
+  }
+});

@@ -1,38 +1,44 @@
-import { MongoClient } from 'mongodb';
+import mongoose from 'mongoose';
 
-let database;
-let client;
+let isConnected = false;
 
 const connectToDb = async (options = {}) => {
-  if (database) {
-    return database;
+  // Return existing connection if already connected
+  if (isConnected || mongoose.connection.readyState === 1) {
+    isConnected = true;
+    return mongoose.connection.db;
   }
 
   const connectionString = options.connectionString || process.env.MONGODB_URI;
-  const databaseName = options.databaseName || process.env.MONGODB_DB_NAME || 'practice';
 
   if (!connectionString) {
-    throw new Error('MONGODB_URI is required.');
+    throw new Error('MONGODB_URI is required in your environment variables.');
   }
 
-  client = new MongoClient(connectionString);
-  await client.connect();
-  database = client.db(databaseName);
-  return database;
+  // Set database name (kizuna-rail-db)
+  const dbName = process.env.MONGODB_DB_NAME || 'kizuna-rail-db';
+
+  // Connect cleanly using Mongoose
+  await mongoose.connect(connectionString, {
+    dbName: dbName,
+  });
+
+  isConnected = true;
+  console.log(`Connected to database: ${mongoose.connection.name}`);
+  return mongoose.connection.db;
 };
 
 const getDb = () => {
-  if (!database) {
+  if (!isConnected && mongoose.connection.readyState !== 1) {
     throw new Error('Database not initialized. Call connectToDb first.');
   }
-  return database;
+  return mongoose.connection.db;
 };
 
 const closeDb = async () => {
-  if (client) {
-    await client.close();
-    client = undefined;
-    database = undefined;
+  if (isConnected || mongoose.connection.readyState !== 0) {
+    await mongoose.disconnect();
+    isConnected = false;
   }
 };
 

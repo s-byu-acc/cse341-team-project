@@ -7,9 +7,9 @@
         </div>
     </div>
 
-    <form class="booking-form" method="POST" action="/trips/book">
+    <form class="booking-form" action="/routes/book" method="POST">
         <input type="hidden" name="scheduleId" value="<%= schedule.id %>">
-        <input type="hidden" name="tripId" value="<%= schedule.tripId %>">
+        <input type="hidden" name="routeId" value="<%= schedule.routeId %>">
 
         <section class="ticket-selection">
             <h2 class="section-title">Select Your Ticket</h2>
@@ -180,7 +180,7 @@
         </section>
 
         <div class="form-actions">
-            <a href="/trips/<%= schedule.tripId %>" class="btn btn-secondary">Cancel</a>
+            <a href="/routes/<%= schedule.routeId %>" class="btn btn-secondary">Cancel</a>
             <button type="submit" class="btn btn-primary">Confirm Booking</button>
         </div>
     </form>

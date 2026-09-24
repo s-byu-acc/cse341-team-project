@@ -446,6 +446,23 @@ article.booking-page {
         }
     }
 
+    /* WEEK03: FEATURE-SET0-3 STYLING */
+    /* Custom Table & Badge Styling for Bookings Admin */
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+    
+    .badge.bg-secondary {
+        font-size: 0.85rem;
+        padding: 0.35em 0.65em;
+        border-radius: 0.25rem;
+    }
+    
+    #bookingsTable {
+        margin-top: 1.5rem;
+    }
+
+
     @media (min-width: 768px) {
         .route-header {
             margin-bottom: var(--space-2xl);
