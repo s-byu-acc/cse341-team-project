@@ -5,6 +5,7 @@ import routes from './src/routes/router.js';
 import pkg from './package.json' with { type: 'json' };
 import { fileURLToPath } from 'url';
 import { initializeDatabase } from './src/models/db-in-file.js';
+import { connectToDb } from './src/db/connect.js';
 
 /**
  * Declare Important Variables
@@ -111,6 +112,12 @@ if (NODE_ENV.includes('dev')) {
 /**
  * Start Server
  */
-app.listen(PORT, async () => {
-    console.log(`Server is running on http://127.0.0.1:${PORT}`);
-});
+try {
+    await connectToDb();
+    app.listen(PORT, () => {
+        console.log(`Server is running on http://127.0.0.1:${PORT}`);
+    });
+} catch (error) {
+    console.error('Application startup failed:', error.message);
+    process.exitCode = 1;
+}
