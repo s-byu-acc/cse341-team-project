@@ -11,7 +11,7 @@
 		"dev": "nodemon",
 		"db:seed": "node --env-file=.env src/db/import.js",
 		"reset": "node restore.js 3000 3001",
-		"start": "node --env-file=.env server.js",
+		"start": "node server.js",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
 		"test": "echo \"Error: no test specified\" && exit 1"
