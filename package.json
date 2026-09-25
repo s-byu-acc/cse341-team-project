@@ -4,15 +4,21 @@
 		"ejs": "^3.1.10",
 		"express": "^5.1.0",
 		"mongoose": "^9.10.1",
+<<<<<<< HEAD
+=======
+		"mongodb": "^7.1.0",
+>>>>>>> e1a6becc2fa4ec7519e0328c7b7a83f77376a890
 		"swagger-ui-express": "^5.0.1"
 	},
 	"scripts": {
-		"dev": "nodemon --env-file=.env server.js",
+		"dev": "nodemon",
+		"db:seed": "node --env-file=.env src/db/import.js",
 		"reset": "node restore.js 3000 3001",
 		"start": "node server.js",
 		"swagger": "node swagger.js",
 		"lint": "eslint .",
-		"lint:fix": "eslint . --fix"
+		"lint:fix": "eslint . --fix",
+		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"type": "module",
 	"version": "1.0.0",

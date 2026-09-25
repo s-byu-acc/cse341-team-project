@@ -1,18 +1,18 @@
 import { Router } from 'express';
-
-import { 
-  bookingPage, 
-  processBookingRequest, 
-  confirmationPage 
+import {
+  bookingPage,
+  processBookingRequest,
+  confirmationPage
 } from '../controllers/bookings.js';
-
-import listTripsPage from './list.js';
-import tripDetailsPage from './details.js';
+import {
+  getTripDetailsPage as tripDetailsPage,
+  getTripsPage as tripsPage
+} from '../controllers/trips.js';
 
 const router = Router();
 
 // 1. List all trips
-router.get('/', listTripsPage);
+router.get('/', tripsPage);
 
 // 2. Specific booking routes comes before /:tripId
 router.get('/booking/:scheduleId', bookingPage);
