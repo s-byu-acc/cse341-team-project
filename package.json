@@ -4,10 +4,7 @@
 		"ejs": "^3.1.10",
 		"express": "^5.1.0",
 		"mongoose": "^9.10.1",
-<<<<<<< HEAD
-=======
 		"mongodb": "^7.1.0",
->>>>>>> e1a6becc2fa4ec7519e0328c7b7a83f77376a890
 		"swagger-ui-express": "^5.0.1"
 	},
 	"scripts": {
