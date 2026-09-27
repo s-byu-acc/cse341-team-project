@@ -2,7 +2,10 @@
 import {
   createBooking,
   getAllBookings as findAllBookings,
-  getBookingById
+  getBookingById,
+  getBookingsByPassengerEmail as findBookingsByPassengerEmail,
+  updateBookingById,
+  deleteBookingById
 } from '../models/bookings.js';
 
 import {
@@ -79,12 +82,128 @@ export const confirmationPage = async (req, res) => {
 
 // 4. API Controller: Get All Bookings for Swagger & Web Services
 export async function getAllBookings(req, res) {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
   try {
-    const bookings = await findAllBookings();
+    const bookings = req.user.role === 'admin'
+      ? await findAllBookings()
+      : await findBookingsByPassengerEmail(req.user.email);
+
     return res.status(200).json(bookings);
   } catch (error) {
     console.error('Error getting bookings API:', error);
     return res.status(500).json({ error: 'Error retrieving bookings' });
+  }
+}
+
+const canManageBooking = (user, booking) => {
+  if (user.role === 'admin') {
+    return true;
+  }
+
+  const userEmail = typeof user.email === 'string' ? user.email.trim().toLowerCase() : '';
+  return userEmail !== '' && booking.passengers?.some((passenger) =>
+    typeof passenger.email === 'string' && passenger.email.trim().toLowerCase() === userEmail
+  );
+};
+
+const validateBookingUpdate = (body) => {
+  const fields = ['scheduleId', 'tripId', 'ticketClass', 'selectedDay', 'totalAmount', 'passengers'];
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return null;
+  if (fields.some((field) => !Object.hasOwn(body, field)) || Object.keys(body).some((field) => !fields.includes(field))) {
+    return null;
+  }
+
+  const textFields = ['scheduleId', 'tripId', 'ticketClass', 'selectedDay'];
+  if (textFields.some((field) => typeof body[field] !== 'string' || !body[field].trim())) {
+    return null;
+  }
+  if (typeof body.totalAmount !== 'number' || !Number.isFinite(body.totalAmount) || body.totalAmount < 0) {
+    return null;
+  }
+  if (!Array.isArray(body.passengers) || body.passengers.length === 0) {
+    return null;
+  }
+
+  const passengerFields = ['firstName', 'lastName', 'email', 'phone'];
+  const passengers = body.passengers.map((passenger) => {
+    if (!passenger || typeof passenger !== 'object' || Array.isArray(passenger)) return null;
+    if (passengerFields.some((field) => typeof passenger[field] !== 'string' || !passenger[field].trim())) {
+      return null;
+    }
+    if (Object.keys(passenger).some((field) => !passengerFields.includes(field))) return null;
+
+    return Object.fromEntries(passengerFields.map((field) => [field, passenger[field].trim()]));
+  });
+
+  if (passengers.some((passenger) => passenger === null)) return null;
+
+  return {
+    scheduleId: body.scheduleId.trim(),
+    tripId: body.tripId.trim(),
+    ticketClass: body.ticketClass.trim(),
+    selectedDay: body.selectedDay.trim(),
+    totalAmount: body.totalAmount,
+    passengers
+  };
+};
+
+export async function updateBooking(req, res) {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  try {
+    const booking = await getBookingById(req.params.bookingCode);
+    if (!booking) {
+      return res.status(404).json({ error: 'Booking not found' });
+    }
+    if (!canManageBooking(req.user, booking)) {
+      return res.status(403).json({ error: 'You are not authorized to update this booking' });
+    }
+
+    const bookingData = validateBookingUpdate(req.body);
+    if (!bookingData) {
+      return res.status(400).json({ error: 'Invalid booking data' });
+    }
+
+    const updatedBooking = await updateBookingById(req.params.bookingCode, bookingData);
+    if (!updatedBooking) {
+      return res.status(404).json({ error: 'Booking not found' });
+    }
+
+    return res.status(200).json({ booking: updatedBooking });
+  } catch (error) {
+    console.error('Error updating booking:', error);
+    return res.status(500).json({ error: 'Error updating booking' });
+  }
+}
+
+export async function deleteBooking(req, res) {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  try {
+    const booking = await getBookingById(req.params.bookingCode);
+    if (!booking) {
+      return res.status(404).json({ error: 'Booking not found' });
+    }
+    if (!canManageBooking(req.user, booking)) {
+      return res.status(403).json({ error: 'You are not authorized to delete this booking' });
+    }
+
+    const deletedBooking = await deleteBookingById(req.params.bookingCode);
+    if (!deletedBooking) {
+      return res.status(404).json({ error: 'Booking not found' });
+    }
+
+    return res.status(200).json({ message: 'Booking deleted', bookingCode: deletedBooking.bookingCode });
+  } catch (error) {
+    console.error('Error deleting booking:', error);
+    return res.status(500).json({ error: 'Error deleting booking' });
   }
 }
 

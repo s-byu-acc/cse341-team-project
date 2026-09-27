@@ -36,7 +36,34 @@ export async function getAllBookings() {
 }
 
 /**
- * 3. Fetching a single booking by its generated booking code
+ * 3. Fetch bookings with at least one passenger matching the user's email.
+ */
+export async function getBookingsByPassengerEmail(email) {
+  if (typeof email !== 'string' || !email.trim()) {
+    return [];
+  }
+
+  const escapedEmail = email.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  return Booking.find({
+    'passengers.email': { $regex: `^${escapedEmail}$`, $options: 'i' }
+  }).sort({ createdAt: -1 }).lean();
+}
+
+export async function updateBookingById(bookingCode, bookingData) {
+  return Booking.findOneAndUpdate(
+    { bookingCode },
+    { $set: bookingData },
+    { new: true, runValidators: true }
+  ).lean();
+}
+
+export async function deleteBookingById(bookingCode) {
+  return Booking.findOneAndDelete({ bookingCode }).lean();
+}
+
+/**
+ * 4. Fetching a single booking by its generated booking code
  */
 export async function getBookingById(bookingCode) {
   return Booking.findOne({ bookingCode }).lean();
