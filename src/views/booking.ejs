@@ -7,7 +7,8 @@
         <p>Live database bookings updated via client API fetches.</p>
 
         <div id="loading" class="alert alert-info">Loading bookings...</div>
-        <div id="error-message" class="alert alert-danger d-none">To load bookings data.</div>
+        <div id="error-message" class="alert alert-danger d-none" role="alert"></div>
+        <div id="booking-status" class="alert alert-info d-none" role="status" aria-live="polite"></div>
 
         <table class="table table-striped d-none" id="bookingsTable">
             <thead>
@@ -19,12 +20,34 @@
                     <th>Day</th>
                     <th>Passengers</th>
                     <th>Date</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody id="bookingsTableBody">
                 <!--To be populated dynamically via public/js/main.js -->
             </tbody>
         </table>
+
+        <dialog id="editBookingDialog" aria-labelledby="editBookingTitle">
+            <form id="editBookingForm">
+                <h2 id="editBookingTitle">Edit booking</h2>
+                <input type="hidden" name="bookingCode">
+                <label>Schedule ID <input name="scheduleId" required></label>
+                <label>Trip ID <input name="tripId" required></label>
+                <label>Ticket class <input name="ticketClass" required></label>
+                <label>Selected day <input name="selectedDay" required></label>
+                <label>Total amount <input name="totalAmount" type="number" min="0" step="0.01" required></label>
+                <fieldset>
+                    <legend>Passengers</legend>
+                    <div id="editBookingPassengers"></div>
+                    <button id="addBookingPassenger" type="button">Add passenger</button>
+                </fieldset>
+                <div>
+                    <button id="cancelBookingEdit" type="button">Cancel</button>
+                    <button type="submit">Save changes</button>
+                </div>
+            </form>
+        </dialog>
     </main>
 
     <%- include('partials/footer') %>

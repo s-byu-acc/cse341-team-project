@@ -6,6 +6,22 @@ import { homePage, aboutPage, testErrorPage } from './index.js';
 
 const router = Router();
 
+const requireAdmin = (req, res, next) => {
+	if (!req.user) {
+		return res.redirect('/login?returnTo=%2Fadmin');
+	}
+
+	if (req.user.role !== 'admin') {
+		return res.status(403).send('Forbidden');
+	}
+
+	return next();
+};
+
+router.get('/admin', requireAdmin, (req, res) => {
+	res.render('admin', { title: 'Admin Dashboard' });
+});
+
 // Home page
 router.get('/', homePage);
 

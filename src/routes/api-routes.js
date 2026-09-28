@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { getAllBookings } from "../controllers/bookings.js";
+import {
+    getAllBookings,
+    updateBooking,
+    deleteBooking
+} from "../controllers/bookings.js";
 
 import {
     getSchedules,
@@ -89,6 +93,8 @@ const router = Router();
  *         description: Server error
  */
 router.get("/", getAllBookings);
+router.put('/:bookingCode', updateBooking);
+router.delete('/:bookingCode', deleteBooking);
 
 /**
  * @swagger
