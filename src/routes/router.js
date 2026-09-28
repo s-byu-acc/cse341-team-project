@@ -2,28 +2,20 @@ import { Router } from 'express';
 import challengeScenariosRouter from './scenarios.js';
 import railRoutesRouter from './routes.js';
 import tripsRouter from './trips.js';
+import authRouter from './auth.js';
 import { homePage, aboutPage, testErrorPage } from './index.js';
+import { requirePageRole } from '../middleware/auth.js';
 
 const router = Router();
 
-const requireAdmin = (req, res, next) => {
-	if (!req.user) {
-		return res.redirect('/login?returnTo=%2Fadmin');
-	}
-
-	if (req.user.role !== 'admin') {
-		return res.status(403).send('Forbidden');
-	}
-
-	return next();
-};
-
-router.get('/admin', requireAdmin, (req, res) => {
+router.get('/admin', requirePageRole('admin'), (req, res) => {
 	res.render('admin', { title: 'Admin Dashboard' });
 });
 
 // Home page
 router.get('/', homePage);
+
+router.use('/', authRouter);
 
 // About page
 router.get('/about', aboutPage);

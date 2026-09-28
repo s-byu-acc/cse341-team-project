@@ -16,8 +16,21 @@ import {
 } from '../controllers/schedules.js';
 
 import { getAllTrips, getTripById } from '../controllers/trips.js';
+import { requireApiLogin, requireApiRole } from '../middleware/auth.js';
 
 const router = Router();
+
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     AuthError:
+ *       type: object
+ *       properties:
+ *         error:
+ *           type: string
+ *           example: Authentication required
+ */
 
 /**
  * @swagger
@@ -67,6 +80,8 @@ const router = Router();
  *   get:
  *     summary: Retrieve all bookings
  *     tags: [Bookings]
+ *     security:
+ *       - sessionCookieAuth: []
  *     responses:
  *       200:
  *         description: A list of all customer bookings
@@ -91,10 +106,119 @@ const router = Router();
  *                     type: number
  *       500:
  *         description: Server error
+ *       401:
+ *         description: Login is required.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthError'
  */
-router.get("/", getAllBookings);
-router.put('/:bookingCode', updateBooking);
-router.delete('/:bookingCode', deleteBooking);
+router.get("/", requireApiLogin(), getAllBookings);
+
+/**
+ * @openapi
+ * /api/bookings/{bookingCode}:
+ *   put:
+ *     summary: Update a booking owned by the signed-in user (or any booking as an admin)
+ *     tags: [Bookings]
+ *     security:
+ *       - sessionCookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: bookingCode
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [scheduleId, tripId, ticketClass, selectedDay, totalAmount, passengers]
+ *             properties:
+ *               scheduleId: { type: string }
+ *               tripId: { type: string }
+ *               ticketClass: { type: string }
+ *               selectedDay: { type: string }
+ *               totalAmount: { type: number }
+ *               passengers:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *     responses:
+ *       200:
+ *         description: Booking updated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 booking:
+ *                   type: object
+ *       400:
+ *         description: Invalid booking data.
+ *       401:
+ *         description: Login is required.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthError'
+ *       403:
+ *         description: The booking does not belong to the signed-in user.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthError'
+ *       404:
+ *         description: Booking not found.
+ *       500:
+ *         description: Error updating booking.
+ */
+router.put('/:bookingCode', requireApiLogin(), updateBooking);
+
+/**
+ * @openapi
+ * /api/bookings/{bookingCode}:
+ *   delete:
+ *     summary: Delete a booking owned by the signed-in user (or any booking as an admin)
+ *     tags: [Bookings]
+ *     security:
+ *       - sessionCookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: bookingCode
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Booking deleted successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message: { type: string, example: Booking deleted }
+ *                 bookingCode: { type: string }
+ *       401:
+ *         description: Login is required.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthError'
+ *       403:
+ *         description: The booking does not belong to the signed-in user.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthError'
+ *       404:
+ *         description: Booking not found.
+ *       500:
+ *         description: Error deleting booking.
+ */
+router.delete('/:bookingCode', requireApiLogin(), deleteBooking);
 
 /**
  * @swagger
@@ -356,6 +480,8 @@ router.get('/schedules/:id', getScheduleById);
  *     summary: Create a schedule
  *     tags:
  *       - Schedules
+ *     security:
+ *       - sessionCookieAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -375,8 +501,20 @@ router.get('/schedules/:id', getScheduleById);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
+ *       '401':
+ *         description: Login is required.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthError'
+ *       '403':
+ *         description: The signed-in user must have the admin role.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthError'
  */
-router.post('/schedules', createSchedule);
+router.post('/schedules', requireApiRole('admin'), createSchedule);
 
 /**
  * @openapi
@@ -385,6 +523,8 @@ router.post('/schedules', createSchedule);
  *     summary: Update a schedule
  *     tags:
  *       - Schedules
+ *     security:
+ *       - sessionCookieAuth: []
  *     parameters:
  *       - name: id
  *         in: path
@@ -412,8 +552,20 @@ router.post('/schedules', createSchedule);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
+ *       '401':
+ *         description: Login is required.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthError'
+ *       '403':
+ *         description: The signed-in user must have the admin role.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthError'
  */
-router.put('/schedules/:id', updateSchedule);
+router.put('/schedules/:id', requireApiRole('admin'), updateSchedule);
 
 /**
  * @openapi
@@ -422,6 +574,8 @@ router.put('/schedules/:id', updateSchedule);
  *     summary: Delete a schedule
  *     tags:
  *       - Schedules
+ *     security:
+ *       - sessionCookieAuth: []
  *     parameters:
  *       - name: id
  *         in: path
@@ -439,7 +593,19 @@ router.put('/schedules/:id', updateSchedule);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
+ *       '401':
+ *         description: Login is required.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthError'
+ *       '403':
+ *         description: The signed-in user must have the admin role.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthError'
  */
-router.delete('/schedules/:id', deleteSchedule);
+router.delete('/schedules/:id', requireApiRole('admin'), deleteSchedule);
 
 export default router;

@@ -29,7 +29,7 @@
             </div>
             <nav>
                 <input id="mobile-menu-toggle" type="checkbox">
-                <label for="mobile-menu-toggle">
+                <label for="mobile-menu-toggle" aria-label="Toggle navigation menu">
                     <span></span>
                     <span></span>
                     <span></span>
@@ -38,6 +38,16 @@
                     <li><a href="/routes">Routes</a></li>
                     <li><a href="/about">About</a></li>
                     <li><a href="/scenarios">Scenarios</a></li>
+                    <% if (currentUser?.role === 'admin') { %>
+                        <li><a href="/admin">Admin</a></li>
+                    <% } %>
+                    <% if (currentUser) { %>
+                        <li class="account-nav-item"><span><%= currentUser.displayName %> · <%= currentUser.role %></span></li>
+                        <li><form class="logout-form" action="/logout" method="post"><button type="submit">Log out</button></form></li>
+                    <% } else { %>
+                        <li><a href="/login">Log in</a></li>
+                        <li><a href="/register">Register</a></li>
+                    <% } %>
                     <li><a href="/404">404</a></li>
                     <li><a href="/500">500</a></li>
                 </ul>

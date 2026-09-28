@@ -6,6 +6,7 @@ import trains from './seeds/trains.json' with { type: 'json' };
 import routes from '../models/seeds/routes.json' with { type: 'json' };
 
 const starterCollections = [
+  ['roles', [{ name: 'customer' }, { name: 'admin' }]],
   ['routes', routes],
   ['trips', trips],
   ['schedules', schedules],

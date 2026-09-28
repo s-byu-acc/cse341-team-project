@@ -17,7 +17,7 @@ const PORT = process.env.PORT || 3000;
  */
 
 // Setup file-based database
-initializeDatabase(DATABASE_FILE);
+initializeDatabase(Path.join(__dirname, 'src', 'models', 'db-in-file.json'));
 
 // Start Database and Server
 const startServer = async () => {

@@ -9,6 +9,16 @@ const options = {
       version: '1.0.0',
       description: 'API for managing train schedules, routes, and ticket bookings'
     },
+    components: {
+      securitySchemes: {
+        sessionCookieAuth: {
+          type: 'apiKey',
+          in: 'cookie',
+          name: 'kizuna.sid',
+          description: 'Session cookie set after logging in.'
+        }
+      }
+    },
     servers: [
       {
         url: '/',

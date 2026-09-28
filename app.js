@@ -3,6 +3,7 @@ import Path from 'path';
 import { fileURLToPath } from 'url';
 import pkg from './package.json' with { type: 'json' };
 import globalMiddleware from './src/middleware/global.js';
+import sessionMiddleware from './src/middleware/session.js';
 import routes from './src/routes/router.js';
 import apiRouter from './src/routes/api-routes.js';
 import swaggerUi from 'swagger-ui-express';
@@ -12,6 +13,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = Path.dirname(__filename);
 
 const app = express();
+app.set('trust proxy', 1);
 
 // Add version info to res.locals for access in templates.
 app.use((req, res, next) => {
@@ -30,6 +32,8 @@ app.set('views', Path.join(__dirname, 'src/views'));
 // Parse JSON and URL-encoded request bodies.
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+app.use(sessionMiddleware);
 
 //Global middleware
 app.use(globalMiddleware);
