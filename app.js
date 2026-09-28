@@ -5,6 +5,7 @@ import pkg from './package.json' with { type: 'json' };
 import globalMiddleware from './src/middleware/global.js';
 import routes from './src/routes/router.js';
 import apiRouter from './src/routes/api-routes.js';
+import userAdminRouter from './src/routes/userAdmin.js';
 import swaggerUi from 'swagger-ui-express';
 import swaggerDocument from './swagger.json' with { type: 'json' };
 
@@ -40,9 +41,14 @@ app.use(globalMiddleware);
 // 1. API Routes (Order-operation:mounted BEFORE root web routes)
 app.use('/api/bookings', apiRouter);
 
-// 2. Web / Template Routes
+// 2. User Admin Routes (Mounted before generic web routes)
+app.use('/', userAdminRouter);
+
+// 3. Web / Template Routes
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use('/', routes);
+
+
 
 /**
  * Error Handling

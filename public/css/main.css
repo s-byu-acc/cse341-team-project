@@ -4,6 +4,7 @@
 @import 'base/variables.css' layer(base);
 @import 'base/base.css' layer(base);
 
+@import 'utilities/user.css' layer(utilities);
 @import 'utilities/booking.css' layer(utilities);
 @import 'utilities/confirmation.css' layer(utilities);
 @import 'utilities/home.css' layer(utilities);

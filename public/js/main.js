@@ -306,3 +306,73 @@ document.addEventListener('DOMContentLoaded', async () => {
         showError(err.message || 'Unable to load bookings.');
   }
 });
+
+//Wk4:Feature:3: User-Admin-Page
+ // 1. Fetch Users dynamically on page load
+async function loadUsers() {
+    const tbody = document.getElementById('userTableBody');
+    if (!tbody) return; // Prevents errors on pages that do not have the user table
+
+    const response = await fetch('/api/users');
+    const users = await response.json();
+    tbody.innerHTML = ''; // Clear existing rows
+
+    users.forEach(user => {
+        tbody.innerHTML += `
+            <tr>
+                <td>${user.displayName}</td>
+                <td>${user.email}</td>
+                <td>${user.role}</td>
+                <td>
+                    <button onclick="editUser('${user._id}', '${user.displayName}', '${user.email}', '${user.role}')">Edit</button>
+                    <button onclick="deleteUser('${user._id}')">Delete</button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+// 2. Show the edit form with current user data
+function editUser(id, name, email, role) {
+    document.getElementById('editUserId').value = id;
+    document.getElementById('editName').value = name;
+    document.getElementById('editEmail').value = email;
+    document.getElementById('editRole').value = role;
+    document.getElementById('editFormContainer').style.display = 'block';
+}
+
+function cancelEdit() {
+    document.getElementById('editFormContainer').style.display = 'none';
+}
+
+// 3. Submit Update via PUT request
+async function submitUpdate() {
+    const id = document.getElementById('editUserId').value;
+    const updatedData = {
+        displayName: document.getElementById('editName').value,
+        email: document.getElementById('editEmail').value,
+        role: document.getElementById('editRole').value
+    };
+
+    await fetch(`/api/users/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedData)
+    });
+
+    cancelEdit();
+    loadUsers(); // Refresh table dynamically without page reload
+}
+
+// 4. Submit Delete via DELETE request
+async function deleteUser(id) {
+    if(confirm("Are you sure you want to delete this user?")) {
+        await fetch(`/api/users/${id}`, { method: 'DELETE' });
+        loadUsers(); // Refresh table dynamically
+    }
+}
+
+// Initialize page load
+document.addEventListener('DOMContentLoaded', () => {
+    loadUsers();
+});

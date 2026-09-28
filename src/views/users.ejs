@@ -1,0 +1,30 @@
+<%- include('partials/header') %>
+
+    <h1>User Administration</h1>
+    <a href="/admin">Back to Dashboard</a>
+
+    <table id="usersTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="userTableBody">
+            <!-- JavaScript will populate this -->
+        </tbody>
+    </table>
+
+    <div id="editFormContainer" class="edit-form">
+        <h3>Edit User</h3>
+        <input type="hidden" id="editUserId">
+        <label>Name: <input type="text" id="editName"></label><br><br>
+        <label>Email: <input type="email" id="editEmail"></label><br><br>
+        <label>Role: <input type="text" id="editRole"></label><br><br>
+        <button onclick="submitUpdate()">Save Changes</button>
+        <button onclick="cancelEdit()">Cancel</button>
+    </div>
+
+<%- include('partials/footer') %>
