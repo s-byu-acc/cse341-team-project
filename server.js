@@ -1,24 +1,15 @@
-import Path from 'path';
-import { fileURLToPath } from 'url';
 import app from './app.js';
-import { initializeDatabase } from './src/models/db-in-file.js';
 import { connectToDb } from './src/db/connect.js';
 
 /**
  * Declare Important Variables
  */
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = Path.dirname(__filename);
 const NODE_ENV = process.env.NODE_ENV?.toLowerCase() || 'production';
 const PORT = process.env.PORT || 3000;
-const DATABASE_FILE = Path.join(__dirname, 'src/models/db-in-file.json');
 
 /**
  * Configure Express middleware
  */
-
-// Setup file-based database
-initializeDatabase(Path.join(__dirname, 'src', 'models', 'db-in-file.json'));
 
 // Start Database and Server
 const startServer = async () => {

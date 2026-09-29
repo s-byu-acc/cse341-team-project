@@ -42,8 +42,8 @@ app.use(globalMiddleware);
 /**
  * Routes
  */
-// 1. API Routes (Order-operation:mounted BEFORE root web routes)
-app.use('/api/bookings', apiRouter);
+// 1. API Routes (mounted BEFORE root web routes)
+app.use('/api', apiRouter);
 
 // 2. User Admin Routes (Mounted before generic web routes)
 app.use('/', userAdminRouter);

@@ -2,21 +2,31 @@
 <h1><%- title %></h1>
 
 <div id="filters">
-    Search by Region:
+    <label for="trip-region-filter">Search by Region:</label>
     <select id="trip-region-filter">
         <option value="all">All Regions</option>
     </select>
 
-    Search by Season:
+    <label for="trip-season-filter">Search by Season:</label>
     <select id="trip-season-filter">
         <option value="all">Any Season</option>
     </select>
+
+    <label for="trip-keyword-filter">Keyword:</label>
+    <input id="trip-keyword-filter" type="search" placeholder="Search trip names or descriptions">
 </div>
 
 <div class="trips-state" id="trips-loading">Loading trips...</div>
 <div class="trips-state trips-error" id="trips-error" hidden></div>
 
 <div class="routes-grid" id="trips-list"></div>
+
+<nav class="trip-pagination" id="trip-pagination" aria-label="Trip results pagination" hidden>
+    <button type="button" id="trip-previous" aria-label="Previous page">Previous</button>
+    <span id="trip-page-status" aria-live="polite"></span>
+    <button type="button" id="trip-next" aria-label="Next page">Next</button>
+</nav>
+<p class="trips-result-count" id="trips-result-count" aria-live="polite"></p>
 
 <template id="trip-card-template">
     <article class="route-card">
@@ -73,70 +83,117 @@
         const errorState = document.getElementById('trips-error');
         const regionFilter = document.getElementById('trip-region-filter');
         const seasonFilter = document.getElementById('trip-season-filter');
+        const keywordFilter = document.getElementById('trip-keyword-filter');
+        const pagination = document.getElementById('trip-pagination');
+        const previousButton = document.getElementById('trip-previous');
+        const nextButton = document.getElementById('trip-next');
+        const pageStatus = document.getElementById('trip-page-status');
+        const resultCount = document.getElementById('trips-result-count');
+        let currentPage = 1;
+        let searchTimer;
+        let requestId = 0;
 
-        try {
-            const response = await fetch('/api/trips');
-            if (!response.ok) {
-                throw new Error('Trip request failed.');
-            }
+        const renderTrip = (trip) => {
+            const card = tripTemplate.content.cloneNode(true);
+            const cardElement = card.querySelector('.route-card');
+            cardElement.classList.add(trip.region);
 
-            const trips = await response.json();
-            const regions = [...new Set(trips.map((trip) => trip.region))].sort();
-            const seasons = [...new Set(trips.map((trip) => trip.bestSeason))].sort();
+            card.querySelector('[data-field="name"]').textContent = trip.name;
+            card.querySelector('[data-field="region"]').textContent = trip.region;
+            card.querySelector('[data-field="startStation"]').textContent = trip.startStation;
+            card.querySelector('[data-field="endStation"]').textContent = trip.endStation;
+            card.querySelector('[data-field="duration"]').textContent = trip.duration;
+            card.querySelector('[data-field="distance"]').textContent = trip.distance;
+            card.querySelector('[data-field="description"]').textContent = trip.description;
 
-            regions.forEach((region) => regionFilter.append(new Option(region, region)));
-            seasons.forEach((season) => seasonFilter.append(new Option(season, season)));
+            const seasonBadge = card.querySelector('[data-field="bestSeason"]');
+            seasonBadge.textContent = `Best in ${trip.bestSeason}`;
+            seasonBadge.classList.add(`season-${trip.bestSeason}`);
 
-            const renderTrips = () => {
-                const selectedRegion = regionFilter.value;
-                const selectedSeason = seasonFilter.value;
+            const highlights = card.querySelector('[data-field="highlights"]');
+            trip.highlights.forEach((highlight) => {
+                const tag = document.createElement('span');
+                tag.className = 'highlight-tag';
+                tag.textContent = highlight;
+                highlights.append(tag);
+            });
+
+            const detailsLink = card.querySelector('[data-field="detailsLink"]');
+            detailsLink.href = `/trips/${encodeURIComponent(trip.id)}`;
+            tripsList.append(card);
+        };
+
+        const loadTrips = async () => {
+            const activeRequest = ++requestId;
+            const params = new URLSearchParams({
+                page: currentPage,
+                limit: 10,
+                region: regionFilter.value,
+                season: seasonFilter.value,
+                q: keywordFilter.value.trim()
+            });
+
+            loadingState.hidden = false;
+            errorState.hidden = true;
+
+            try {
+                const response = await fetch(`/api/trips?${params}`);
+                if (!response.ok) {
+                    throw new Error('Trip request failed.');
+                }
+
+                const result = await response.json();
+                if (activeRequest !== requestId) return;
+
+                regionFilter.replaceChildren(new Option('All Regions', 'all'));
+                seasonFilter.replaceChildren(new Option('Any Season', 'all'));
+                result.filters.regions.forEach((region) => regionFilter.append(new Option(region, region)));
+                result.filters.seasons.forEach((season) => seasonFilter.append(new Option(season, season)));
+                regionFilter.value = result.query.region || 'all';
+                seasonFilter.value = result.query.season || 'all';
+
                 tripsList.replaceChildren();
-
-                trips
-                    .filter((trip) => selectedRegion === 'all' || trip.region === selectedRegion)
-                    .filter((trip) => selectedSeason === 'all' || trip.bestSeason === selectedSeason)
-                    .forEach((trip) => {
-                        const card = tripTemplate.content.cloneNode(true);
-                        const cardElement = card.querySelector('.route-card');
-                        cardElement.classList.add(trip.region);
-
-                        card.querySelector('[data-field="name"]').textContent = trip.name;
-                        card.querySelector('[data-field="region"]').textContent = trip.region;
-                        card.querySelector('[data-field="startStation"]').textContent = trip.startStation;
-                        card.querySelector('[data-field="endStation"]').textContent = trip.endStation;
-                        card.querySelector('[data-field="duration"]').textContent = trip.duration;
-                        card.querySelector('[data-field="distance"]').textContent = trip.distance;
-                        card.querySelector('[data-field="description"]').textContent = trip.description;
-
-                        const seasonBadge = card.querySelector('[data-field="bestSeason"]');
-                        seasonBadge.textContent = `Best in ${trip.bestSeason}`;
-                        seasonBadge.classList.add(`season-${trip.bestSeason}`);
-
-                        const highlights = card.querySelector('[data-field="highlights"]');
-                        trip.highlights.forEach((highlight) => {
-                            const tag = document.createElement('span');
-                            tag.className = 'highlight-tag';
-                            tag.textContent = highlight;
-                            highlights.append(tag);
-                        });
-
-                        const detailsLink = card.querySelector('[data-field="detailsLink"]');
-                        detailsLink.href = `/trips/${encodeURIComponent(trip.id)}`;
-                        tripsList.append(card);
-                    });
-
+                result.data.forEach(renderTrip);
+                currentPage = result.pagination.page;
+                pagination.hidden = false;
+                previousButton.disabled = !result.pagination.hasPreviousPage;
+                nextButton.disabled = !result.pagination.hasNextPage;
+                pageStatus.textContent = result.pagination.totalPages
+                    ? `Page ${result.pagination.page} of ${result.pagination.totalPages}`
+                    : 'No pages';
+                resultCount.textContent = `${result.pagination.totalItems} trips found`;
                 loadingState.hidden = true;
-            };
+            } catch (error) {
+                if (activeRequest !== requestId) return;
+                console.error('Trip hydration failed:', error);
+                loadingState.hidden = true;
+                errorState.textContent = 'Unable to load trips right now. Please try again later.';
+                errorState.hidden = false;
+            }
+        };
 
-            regionFilter.addEventListener('change', renderTrips);
-            seasonFilter.addEventListener('change', renderTrips);
-            renderTrips();
-        } catch (error) {
-            console.error('Trip hydration failed:', error);
-            loadingState.hidden = true;
-            errorState.textContent = 'Unable to load trips right now. Please try again later.';
-            errorState.hidden = false;
-        }
+        const resetAndLoad = () => {
+            currentPage = 1;
+            loadTrips();
+        };
+
+        regionFilter.addEventListener('change', resetAndLoad);
+        seasonFilter.addEventListener('change', resetAndLoad);
+        keywordFilter.addEventListener('input', () => {
+            window.clearTimeout(searchTimer);
+            searchTimer = window.setTimeout(resetAndLoad, 250);
+        });
+        previousButton.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage -= 1;
+                loadTrips();
+            }
+        });
+        nextButton.addEventListener('click', () => {
+            currentPage += 1;
+            loadTrips();
+        });
+        loadTrips();
     };
 
     document.addEventListener('DOMContentLoaded', hydrateTrips);

@@ -14,7 +14,7 @@ Collection Name: `bookings`
 | `_id`         | ObjectId | Auto         | Unique document identifier                                     |
 | `bookingCode` | String   | Yes (Unique) | Human-readable confirmation code (e.g., `BK-89A12`)            |
 | `scheduleId`  | String   | Yes          | Associated train schedule ID                                   |
-| `routeId`     | String   | Yes          | Associated route ID                                            |
+| `tripId`      | String   | Yes          | Associated trip ID                                             |
 | `ticketClass` | String   | Yes          | Selected ticket class (e.g., `first`, `standard`, `premium`)   |
 | `selectedDay` | String   | Yes          | Scheduled travel day                                           |
 | `passengers`  | Array    | Yes          | Array of passenger objects (firstName, lastName, email, phone) |
@@ -32,16 +32,16 @@ Collection Name: `bookings`
 * returning HTTP status 200 with an array of booking objects,
 * HTTP status 500 on database failure.
 
-### EJS Page Routes (`src/routes/ejs-routes.js`)
+### EJS Page Routes (`src/routes/trips.js`)
 
-- **GET `/routes/booking/:scheduleId`**: Renders the booking form (`src/views/routes/booking.ejs`).
-- **POST `/routes/book`**: Processes booking submission, creates document in DB, and redirects to `/routes/confirmation/:confirmationId`.
-- **GET `/routes/confirmation/:confirmationId`**: Renders confirmation page (`src/views/routes/confirm.ejs`).
-- **GET `/bookings-admin`**: Renders admin dashboard (`src/views/bookings.ejs`).
+- **GET `/trips/booking/:scheduleId`**: Renders the booking form (`src/views/trips/book.ejs`).
+- **POST `/trips/book`**: Processes booking submission, creates a document in the database, and redirects to `/trips/confirmation/:confirmationId`.
+- **GET `/trips/confirmation/:confirmationId`**: Renders the confirmation page (`src/views/trips/confirm.ejs`).
+- **GET `/bookings-admin`**: Renders the admin bookings page.
 
 ## 4. Test Plan
 
 1. **API Retrieval:** Call `GET http://localhost:3000/api/bookings`  and verify JSON array response.
-2. **Booking Submission:** Fill out customer form on `/routes/booking/:scheduleId`, submit, and confirm redirect to `/routes/confirmation/:bookingCode`.
+2. **Booking Submission:** Fill out the customer form on `/trips/booking/:scheduleId`, submit, and confirm redirect to `/trips/confirmation/:bookingCode`.
 3. **Database Verification:** Verify new entry in MongoDB `bookings` collection.
 4. **Admin Dashboard Hydration:** Visit `/bookings-admin` and verify bookings render dynamically via JavaScript `fetch`.

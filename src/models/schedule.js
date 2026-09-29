@@ -22,13 +22,13 @@ export const getScheduleById = async (id) => {
 
 // Get all schedules belonging to a trip
 export const getSchedulesByTripId = async (tripId) => {
-    return schedules().find({ $or: [{ tripId }, { routeId: tripId }] })
+    return schedules().find({ tripId })
         .sort({ departureTime: 1 }).toArray();
 };
 
 // Get only active trips for a schedule
 export const getActiveSchedulesByTripId = async (tripId) => {
-    return schedules().find({ $or: [{ tripId }, { routeId: tripId }], status: true })
+    return schedules().find({ tripId, status: true })
         .sort({ departureTime: 1 }).toArray();
 };
 
@@ -36,7 +36,7 @@ export const getActiveSchedulesByTripId = async (tripId) => {
 export const createSchedule = async (scheduleData) => {
     const schedule = {
         ...scheduleData,
-        routeId: scheduleData.tripId || scheduleData.routeId,
+        tripId: scheduleData.tripId,
         status: scheduleData.status ?? true
     };
     await schedules().insertOne(schedule);

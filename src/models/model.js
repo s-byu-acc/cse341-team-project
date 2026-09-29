@@ -11,49 +11,11 @@ const findOneById = (name, id) => {
     return collection(name).findOne({ $or: values.map(value => ({ id: value })) });
 };
 
-// ROUTE MODEL FUNCTIONS
+// TRIP MODEL FUNCTIONS
 
-export const getAllRoutes = async () => {
-    return findAll('routes');
-};
+export const getAllTrips = async () => findAll('trips');
 
-export const getListOfRegions = async () => {
-    const regions = new Set((await getAllRoutes()).map(route => route.region));
-    return Array.from(regions);
-};
-
-export const getListOfSeasons = async () => {
-    const seasons = new Set((await getAllRoutes()).map(route => route.bestSeason));
-    return Array.from(seasons);
-};
-
-export const getRouteById = async (routeId) => {
-    return findOneById('routes', routeId);
-};
-
-export const getRoutesByRegion = async (region) => {
-    return collection('routes').find({ region: { $regex: `^${region}$`, $options: 'i' } }).toArray();
-};
-
-export const getRoutesBySeason = async (season) => {
-    return collection('routes').find({ bestSeason: { $regex: `^${season}$`, $options: 'i' } }).toArray();
-};
-
-export const getRoutesByMonth = async (month) => {
-    return collection('routes').find({ operatingMonths: month }).toArray();
-};
-
-export const getRoutesByDuration = async () => {
-    return (await getAllRoutes()).sort((a, b) => {
-        const aDuration = parseFloat(a.duration);
-        const bDuration = parseFloat(b.duration);
-        return aDuration - bDuration;
-    });
-};
-
-export const getRoutesByDistance = async () => {
-    return (await getAllRoutes()).sort((a, b) => a.distance - b.distance);
-};
+export const getTripById = async (tripId) => findOneById('trips', tripId);
 
 // STATION MODEL FUNCTIONS
 
@@ -87,12 +49,12 @@ export const getScheduleById = async (scheduleId) => {
     return findOneById('schedules', scheduleId);
 };
 
-export const getSchedulesByRoute = async (routeId) => {
-    return collection('schedules').find({ routeId }).toArray();
+export const getSchedulesByTripId = async (tripId) => {
+    return collection('schedules').find({ tripId }).toArray();
 };
 
-export const getAvailableSchedulesByRoute = async (routeId) => {
-    return collection('schedules').find({ routeId, status: true }).toArray();
+export const getAvailableSchedulesByTripId = async (tripId) => {
+    return collection('schedules').find({ tripId, status: true }).toArray();
 };
 
 export const getSchedulesByDay = async (day) => {
@@ -121,66 +83,24 @@ export const getTicketClassesByPrice = async () => {
 
 // COMBINED/UTILITY MODEL FUNCTIONS
 
-export const getRouteWithStations = async (routeId) => {
-    const route = await getRouteById(routeId);
-    if (!route) return null;
-
-    const startStation = await getStationById(route.startStation);
-    const endStation = await getStationById(route.endStation);
-
-    return {
-        ...route,
-        startStationDetails: startStation,
-        endStationDetails: endStation
-    };
-};
-
-export const getRouteWithSchedules = async (routeId) => {
-    const route = await getRouteById(routeId);
-    if (!route) return null;
-
-    const routeSchedules = await getSchedulesByRoute(routeId);
-
-    return {
-        ...route,
-        schedules: routeSchedules
-    };
-};
-
-export const getCompleteRouteDetails = async (routeId) => {
-    const route = await getRouteById(routeId);
-    if (!route) return null;
-
-    const startStation = await getStationById(route.startStation);
-    const endStation = await getStationById(route.endStation);
-    const routeSchedules = await getSchedulesByRoute(routeId);
-
-    return {
-        ...route,
-        startStationDetails: startStation,
-        endStationDetails: endStation,
-        schedules: routeSchedules
-    };
-};
-
-export const calculateTicketPrice = async (routeId, className) => {
-    const route = await getRouteById(routeId);
+export const calculateTicketPrice = async (tripId, className) => {
+    const trip = await getTripById(tripId);
     const ticketClass = await getTicketClassByName(className);
 
-    if (!route || !ticketClass) return null;
+    if (!trip || !ticketClass) return null;
 
-    return route.distance * ticketClass.pricePerKm;
+    return trip.distance * ticketClass.pricePerKm;
 };
 
-export const getTicketOptionsForRoute = async (routeId) => {
-    const route = await getRouteById(routeId);
-    if (!route) return null;
+export const getTicketOptionsForTrip = async (tripId) => {
+    const trip = await getTripById(tripId);
+    if (!trip) return null;
 
     const ticketClasses = await getAllTicketClasses();
     return ticketClasses.map(tc => ({
         class: tc.class,
         name: tc.name,
-        price: route.distance * tc.pricePerKm,
+        price: trip.distance * tc.pricePerKm,
         amenities: tc.amenities,
         description: tc.description
     }));
@@ -190,37 +110,37 @@ export const getTicketOptionsForSchedule = async (scheduleId) => {
     const schedule = await getScheduleById(scheduleId);
     if (!schedule) return null;
 
-    return getTicketOptionsForRoute(schedule.routeId);
+    return getTicketOptionsForTrip(schedule.tripId);
 };
 
-export const isRouteOperating = async (routeId) => {
-    const route = await getRouteById(routeId);
-    if (!route) return false;
+export const isTripOperating = async (tripId) => {
+    const trip = await getTripById(tripId);
+    if (!trip) return false;
 
     const currentMonth = new Date().getMonth() + 1;
-    return route.operatingMonths.includes(currentMonth);
+    return trip.operatingMonths.includes(currentMonth);
 };
 
-export const getScheduleWithRoute = async (scheduleId) => {
+export const getScheduleWithTrip = async (scheduleId) => {
     const schedule = await getScheduleById(scheduleId);
     if (!schedule) return null;
 
-    const route = await getRouteById(schedule.routeId);
+    const trip = await getTripById(schedule.tripId);
 
     return {
         ...schedule,
-        routeDetails: route
+        tripDetails: trip
     };
 };
 
-export const searchRoutes = async (keyword) => {
+export const searchTrips = async (keyword) => {
     const searchTerm = keyword.toLowerCase();
-    const routes = await getAllRoutes();
-    return routes.filter(route => {
+    const trips = await getAllTrips();
+    return trips.filter(trip => {
         return (
-            route.name.toLowerCase().includes(searchTerm) ||
-            route.description.toLowerCase().includes(searchTerm) ||
-            route.highlights.some(highlight => highlight.toLowerCase().includes(searchTerm))
+            trip.name.toLowerCase().includes(searchTerm) ||
+            trip.description.toLowerCase().includes(searchTerm) ||
+            trip.highlights.some(highlight => highlight.toLowerCase().includes(searchTerm))
         );
     });
 };
