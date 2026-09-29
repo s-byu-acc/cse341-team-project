@@ -1,0 +1,24 @@
+<%- include('./partials/header') %>
+<section class="auth-page">
+    <div class="auth-aside">
+        <p class="auth-kicker">KIZUNA RAIL / ACCOUNT</p>
+        <h1>Good to see you again.</h1>
+        <p>Your saved journeys and bookings are waiting.</p>
+        <div class="auth-route-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+    </div>
+    <div class="auth-form-panel">
+        <p class="auth-overline">WELCOME BACK</p>
+        <h2>Log in</h2>
+        <% if (error) { %><p class="auth-error" role="alert"><%= error %></p><% } %>
+        <form action="/login" method="post" class="auth-form">
+            <input type="hidden" name="returnTo" value="<%= returnTo %>">
+            <label for="identifier">Username or email</label>
+            <input id="identifier" name="identifier" type="text" value="<%= identifier %>" autocomplete="username" required>
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" required>
+            <button type="submit">Log in</button>
+        </form>
+        <p class="auth-switch">New to Kizuna Rail? <a href="/register">Create an account</a></p>
+    </div>
+</section>
+<%- include('./partials/footer') %>

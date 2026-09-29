@@ -12,16 +12,9 @@ import {
   confirmationPage,
   bookingsAdminPage,
 } from '../controllers/bookings.js';
+import { requirePageRole } from '../middleware/auth.js';
 
 const router = Router();
-
-const requireAuthenticatedUser = (req, res, next) => {
-  if (req.user) {
-    return next();
-  }
-
-  return res.redirect('/login?returnTo=%2Froutes%2Fbookings-admin');
-};
 
 // 1. List all train routes (/routes)
 router.get('/', listRoutes);
@@ -32,7 +25,7 @@ router.post('/book', processBookingRequest);
 router.get('/confirmation/:bookingCode', confirmationPage);
 
 // 3. Admin & Swagger API endpoints
-router.get('/bookings-admin', requireAuthenticatedUser, bookingsAdminPage);
+router.get('/bookings-admin', requirePageRole('admin'), bookingsAdminPage);
 router.get('/api/bookings', getAllBookings);
 
 // 4. Dynamic route detail page such as /routes/alpine-panorama.

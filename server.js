@@ -18,7 +18,7 @@ const DATABASE_FILE = Path.join(__dirname, 'src/models/db-in-file.json');
  */
 
 // Setup file-based database
-initializeDatabase(DATABASE_FILE);
+initializeDatabase(Path.join(__dirname, 'src', 'models', 'db-in-file.json'));
 
 // Start Database and Server
 const startServer = async () => {
