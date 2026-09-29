@@ -11,6 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = Path.dirname(__filename);
 const NODE_ENV = process.env.NODE_ENV?.toLowerCase() || 'production';
 const PORT = process.env.PORT || 3000;
+const DATABASE_FILE = Path.join(__dirname, 'src/models/db-in-file.json');
 
 /**
  * Configure Express middleware
