@@ -26,20 +26,20 @@
         
         <li class="task-item">
             <input type="checkbox" id="task-2">
-            <label for="task-2" class="task-title">Reorganize the routes folder structure</label>
-            <p class="task-description">The <code>routes</code> folder (controllers) is disorganized with all files dumped in one place. Create a <code>routes</code> subfolder, rename <code>routes.js</code> to <code>index.js</code> and move it inside, then move all route-related files into this new folder. Remember we're talking about train routes here, not every <code>Express.js</code> route controller.</p>
+            <label for="task-2" class="task-title">Organize the trip controller modules</label>
+            <p class="task-description">Trip list and detail handlers are becoming difficult to maintain together. Group the trip-specific handlers in a dedicated controller module and update imports without moving shared booking or schedule handlers.</p>
         </li>
         
         <li class="task-item">
             <input type="checkbox" id="task-3">
-            <label for="task-3" class="task-title">Repair the routes page filtering</label>
-            <p class="task-description">The routes page has broken sorting features for region and season. The dropdowns exist but don't actually filter the displayed routes. Get the filtering working using query parameters, keeping in mind that users might filter by region only, season only, or both. You should also add a grid layout so you can center the region filter on the left side and the season filter on the right side of the page.</p>
+            <label for="task-3" class="task-title">Repair the trips page filtering</label>
+            <p class="task-description">The trips page has broken filtering for region and season. The dropdowns exist but don't actually filter the displayed trips. Get the filtering working using query parameters, keeping in mind that users might filter by region only, season only, or both.</p>
         </li>
         
         <li class="task-item">
             <input type="checkbox" id="task-4">
             <label for="task-4" class="task-title">Improve the operating schedule display</label>
-            <p class="task-description">When viewing a route's details, the operating months are shown as numbers (1, 2, 3) instead of text (Jan, Feb, Mar), which isn't intuitive for users. Create a new helper function and use it to display three-letter month abbreviations instead.</p>
+            <p class="task-description">When viewing a trip's details, the operating months are shown as numbers (1, 2, 3) instead of text (Jan, Feb, Mar), which isn't intuitive for users. Create a new helper function and use it to display three-letter month abbreviations instead.</p>
         </li>
         
         <li class="task-item">
@@ -66,13 +66,13 @@
         </div>
 
         <div class="hint-item">
-            <h3>Reorganize Routes Folder</h3>
-            <p>Create a new folder called <code>"routes"</code> inside your controllers directory. Rename the existing <code>routes.js</code> file to <code>index.js</code> and move it into this new folder. Then identify all other files related to train routes (like <code>route-detail.js</code>, etc.) and move those into the <code>routes</code> folder as well. Update any import paths that reference these files.</p>
+            <h3>Organize Trip Controllers</h3>
+            <p>Keep trip list and detail handlers grouped together, while leaving shared booking and schedule handlers in their existing modules.</p>
         </div>
 
         <div class="hint-item">
-            <h3>Routes Filtering</h3>
-            <p>You'll need to read query parameters (like <code>?region=central</code> or <code>?season=autumn</code>) in the routes controller, then pass those values to filter the routes data before sending it to the view. The JavaScript on the page should update the URL when users select filters. For the layout, use CSS Grid on the filters container with two columns to position the region filter on the left and season filter on the right.</p>
+            <h3>Trip Filtering</h3>
+            <p>Read query parameters (like <code>?region=central</code> or <code>?season=autumn</code>) in the trips API and filter the trips data before returning it to the page. The client-side list should reflect the current filters and page.</p>
         </div>
 
         <div class="hint-item">

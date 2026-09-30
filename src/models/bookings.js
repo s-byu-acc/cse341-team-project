@@ -10,7 +10,7 @@ export async function createBooking(bookingData) {
   const newBooking = new Booking({
     bookingCode,
     scheduleId: bookingData.scheduleId || '1',
-    tripId: bookingData.routeId || bookingData.tripId || '1',
+    tripId: bookingData.tripId || '1',
     ticketClass: bookingData.ticketClass || 'Standard',
     selectedDay: bookingData.selectedDay || 'Today',
     passengers: [

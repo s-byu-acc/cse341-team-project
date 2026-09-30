@@ -9,7 +9,7 @@ import {
 } from '../models/bookings.js';
 
 import {
-  getScheduleWithRoute,
+  getScheduleWithTrip,
   getTicketOptionsForSchedule,
   getAllTicketClasses
 } from '../models/model.js';
@@ -21,7 +21,7 @@ export const bookingPage = async (req, res) => {
   try {
     const { scheduleId } = req.params;
 
-    const schedule = await getScheduleWithRoute(scheduleId);
+    const schedule = await getScheduleWithTrip(scheduleId);
     if (!schedule) {
       return res.status(404).send('Schedule not found');
     }
@@ -32,7 +32,7 @@ export const bookingPage = async (req, res) => {
     return res.render('trips/book', {
       title: 'Book Trip',
       schedule,
-      route: schedule.routeDetails,
+      trip: schedule.tripDetails,
       ticketOptions,
       ticketClasses
     });
@@ -49,7 +49,7 @@ export const processBookingRequest = async (req, res) => {
     const savedBooking = await createBooking(req.body);
 
     // Redirect to confirmation route using new bookingCode
-    return res.redirect(`/routes/confirmation/${savedBooking.bookingCode}`);
+    return res.redirect(`/trips/confirmation/${savedBooking.bookingCode}`);
   } catch (error) {
     console.error('Error saving booking to MongoDB:', error);
     return res.status(500).send('Failed to process booking');

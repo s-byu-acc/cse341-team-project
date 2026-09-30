@@ -6,7 +6,7 @@ Add a protected booking-management page at `/admin/bookings`. The page is render
 
 The page must support editing a booking and deleting it. Successful mutations update the visible list without a full-page reload. Authorization is enforced in the API/model request path as well as by the page middleware; hiding controls in the browser is not an authorization boundary.
 
-The existing application stores bookings in the `confirmations` collection/array. In the current file-backed model, each record has `id`, `createdAt`, `scheduleId`, `routeId`, `ticketClass`, `selectedDay`, and `passengers[]`. Each passenger contains `firstName`, `lastName`, `email`, and `phone`. Keep the public booking identifier as `id`; the UI may label the records “bookings” while the existing persistence collection remains `confirmations`.
+The existing application stores bookings in the `confirmations` collection/array. In the current file-backed model, each record has `id`, `createdAt`, `scheduleId`, `tripId`, `ticketClass`, `selectedDay`, and `passengers[]`. Each passenger contains `firstName`, `lastName`, `email`, and `phone`. Keep the public booking identifier as `id`; the UI may label the records “bookings” while the existing persistence collection remains `confirmations`.
 
 ## Scope and Assumptions
 
@@ -27,7 +27,7 @@ Persisted record (existing model):
 	"id": "JRYTW6NZSY",
 	"createdAt": "2026-09-21T18:24:23.881Z",
 	"scheduleId": "11",
-	"routeId": "romantic-gorge",
+	"tripId": "romantic-gorge",
 	"ticketClass": "standard",
 	"selectedDay": "wednesday",
 	"passengers": [
@@ -41,7 +41,7 @@ Persisted record (existing model):
 }
 ```
 
-`id` and `createdAt` are immutable through the update API. Editable booking fields are `scheduleId`, `routeId`, `ticketClass`, `selectedDay`, and `passengers`. Passenger updates replace the passenger array; validate that it is a non-empty array of objects with non-empty first name, last name, and email. Phone may be an empty string if the existing booking form permits it. Reject unknown properties and attempts to change `id` or `createdAt`.
+`id` and `createdAt` are immutable through the update API. Editable booking fields are `scheduleId`, `tripId`, `ticketClass`, `selectedDay`, and `passengers`. Passenger updates replace the passenger array; validate that it is a non-empty array of objects with non-empty first name, last name, and email. Phone may be an empty string if the existing booking form permits it. Reject unknown properties and attempts to change `id` or `createdAt`.
 
 ### Authenticated session
 
@@ -88,7 +88,7 @@ Success: `200 OK`
 			"id": "JRYTW6NZSY",
 			"createdAt": "2026-09-21T18:24:23.881Z",
 			"scheduleId": "11",
-			"routeId": "romantic-gorge",
+			"tripId": "romantic-gorge",
 			"ticketClass": "standard",
 			"selectedDay": "wednesday",
 			"passengers": [
@@ -115,7 +115,7 @@ Authentication required. The caller must be an administrator or a passenger on t
 ```json
 {
 	"scheduleId": "11",
-	"routeId": "romantic-gorge",
+	"tripId": "romantic-gorge",
 	"ticketClass": "standard",
 	"selectedDay": "wednesday",
 	"passengers": [

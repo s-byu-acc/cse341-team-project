@@ -96,7 +96,7 @@ const router = Router();
  *                     type: string
  *                   scheduleId:
  *                     type: string
- *                   routeId:
+ *                   tripId:
  *                     type: string
  *                   ticketClass:
  *                     type: string
@@ -224,17 +224,100 @@ router.delete('/:bookingCode', requireApiLogin(), deleteBooking);
  * @swagger
  * /api/trips:
  *   get:
- *     summary: Get all trips
+ *     summary: Get a filtered page of trips
  *     tags: [Trips]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 50
+ *           default: 10
+ *       - in: query
+ *         name: region
+ *         schema:
+ *           type: string
+ *         description: Filter by trip region.
+ *       - in: query
+ *         name: season
+ *         schema:
+ *           type: string
+ *         description: Filter by best season.
+ *       - in: query
+ *         name: q
+ *         schema:
+ *           type: string
+ *         description: Search trip names and descriptions.
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *           enum: [name, createdAt]
+ *           default: name
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *           default: asc
  *     responses:
  *       200:
- *         description: A list of trips.
+ *         description: A page of trips and pagination metadata.
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Trip'
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Trip'
+ *                 query:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     region:
+ *                       type: string
+ *                     season:
+ *                       type: string
+ *                     q:
+ *                       type: string
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     totalItems:
+ *                       type: integer
+ *                     totalPages:
+ *                       type: integer
+ *                     hasNextPage:
+ *                       type: boolean
+ *                     hasPreviousPage:
+ *                       type: boolean
+ *                 filters:
+ *                   type: object
+ *                   properties:
+ *                     regions:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                     seasons:
+ *                       type: array
+ *                       items:
+ *                         type: string
  *       500:
  *         description: Unable to retrieve trips.
  *         content:
