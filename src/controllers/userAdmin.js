@@ -1,20 +1,26 @@
-// MOCK DATA: I'm using this to test frontend locally.
-// I will delete this array When Feature-1 is merged,& import the Mongoose User model:
-// The methods attached find, findByIdAndUpdate, findByIdAndDelete are built-in Mongoose functions
-// that handle the heavy lifting of searching, modifying, and removing data directly in the MongoDB database.
-
-// import User from '../models/user.js';
-let mockUsers = [
-    { _id: "1", displayName: "Damilola Admin", email: "admin@kizunarail.com", role: "admin" },
-    { _id: "2", displayName: "Test Passenger1", email: "passenger1@test.com", role: "standard" },
-    { _id: "3", displayName: "Test Passenger2", email: "passenger2@test.com", role: "standard" },
-    { _id: "4", displayName: "Test Passenger2", email: "passenger2@test.com", role: "standard" }
-];
+import { User } from '../models/schemas/users.js';
 
 export const getUsers = async (req, res) => {
     try {
-        // FUTURE MONGOOSE CALL: const users = await User.find();
-        return res.status(200).json(mockUsers);
+        let users;
+        
+        // If the user is an admin, find everyone. 
+        // If they are a standard customer, find only their specific document.
+        if (req.user.role === 'admin') {
+            users = await User.find().populate('role');
+        } else {
+            users = await User.find({ _id: req.user.id }).populate('role');
+        }
+        
+        // Format the data so it works cleanly with your EJS frontend
+        const formattedUsers = users.map(u => ({
+            _id: u._id,
+            displayName: u.displayName,
+            email: u.email,
+            role: u.role.name 
+        }));
+
+        return res.status(200).json(formattedUsers);
     } catch (error) {
         return res.status(500).json({ message: "Server error fetching users" });
     }
@@ -23,17 +29,21 @@ export const getUsers = async (req, res) => {
 export const updateUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const { displayName, email, role } = req.body;
+        const { displayName, email } = req.body; 
         
-        // FUTURE MONGOOSE CALL: 
-        // const updatedUser = await User.findByIdAndUpdate(id, { displayName, email, role }, { new: true });
+        // For Security check: If a non-admin tries to update an ID that isn't theirs, block it.
+        if (req.user.role !== 'admin' && req.user.id !== id) {
+            return res.status(403).json({ message: "You can only update your own account." });
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            id, 
+            { displayName, email }, 
+            { new: true }
+        );
         
-        // MOCK LOGIC:
-        const userIndex = mockUsers.findIndex(u => u._id === id);
-        if (userIndex === -1) return res.status(404).json({ message: "User not found" });
-        
-        mockUsers[userIndex] = { ...mockUsers[userIndex], displayName, email, role };
-        return res.status(200).json(mockUsers[userIndex]);
+        if (!updatedUser) return res.status(404).json({ message: "User not found" });
+        return res.status(200).json(updatedUser);
     } catch (error) {
         return res.status(500).json({ message: "Error updating user" });
     }
@@ -43,10 +53,9 @@ export const deleteUser = async (req, res) => {
     try {
         const { id } = req.params;
         
-        // FUTURE MONGOOSE CALL: await User.findByIdAndDelete(id);
-        
-        // MOCK LOGIC:
-        mockUsers = mockUsers.filter(u => u._id !== id);
+        // The router already checks if they are an admin, so I can safely delete here.
+
+        await User.findByIdAndDelete(id);
         return res.status(200).json({ message: "User deleted successfully" });
     } catch (error) {
         return res.status(500).json({ message: "Error deleting user" });

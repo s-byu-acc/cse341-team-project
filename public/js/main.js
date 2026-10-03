@@ -307,7 +307,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-//Wk4:Feature:3: User-Admin-Page
+
+//Wk4:Feature:3: Protected User-Admin-Page
  // 1. Fetch Users dynamically on page load
 async function loadUsers() {
     const tbody = document.getElementById('userTableBody');
@@ -354,11 +355,17 @@ async function submitUpdate() {
         role: document.getElementById('editRole').value
     };
 
-    await fetch(`/api/users/${id}`, {
+    const response = await fetch(`/api/users/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedData)
     });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        alert(`Failed to update: ${errorData.message || errorData.error}`);
+        return; // Stop here if it failed
+    }
 
     cancelEdit();
     loadUsers(); // Refresh table dynamically without page reload
@@ -366,9 +373,15 @@ async function submitUpdate() {
 
 // 4. Submit Delete via DELETE request
 async function deleteUser(id) {
-    if(confirm("Are you sure you want to delete this user?")) {
-        await fetch(`/api/users/${id}`, { method: 'DELETE' });
-        loadUsers(); // Refresh table dynamically
+   if(confirm("Are you sure you want to delete this user?")) {
+        const response = await fetch(`/api/users/${id}`, { method: 'DELETE' });
+        
+        if (!response.ok) {
+            alert("You do not have permission to delete users.");
+            return;
+        }
+        
+        loadUsers(); // Refresh table dynamically without page reload
     }
 }
 
