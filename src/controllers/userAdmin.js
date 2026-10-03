@@ -12,7 +12,7 @@ export const getUsers = async (req, res) => {
             users = await User.find({ _id: req.user.id }).populate('role');
         }
         
-        // Format the data so it works cleanly with your EJS frontend
+        // Format the data so it works cleanly with my EJS frontend
         const formattedUsers = users.map(u => ({
             _id: u._id,
             displayName: u.displayName,
