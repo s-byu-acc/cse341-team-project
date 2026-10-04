@@ -27,7 +27,7 @@ router.get('/trains', trainsApi);
  * @swagger
  * /api/trains:
  *   get:
- *     summary: Get a page of trains
+ *     summary: Get a searchable, sorted page of trains
  *     tags: [Trains]
  *     parameters:
  *       - in: query
@@ -36,6 +36,16 @@ router.get('/trains', trainsApi);
  *       - in: query
  *         name: limit
  *         schema: { type: integer, minimum: 1, maximum: 50, default: 10 }
+ *       - in: query
+ *         name: q
+ *         description: Search train IDs, names, operators, types, power sources, and descriptions.
+ *         schema: { type: string }
+ *       - in: query
+ *         name: sort
+ *         schema: { type: string, enum: [name, operator, type, speed, capacity, power], default: name }
+ *       - in: query
+ *         name: order
+ *         schema: { type: string, enum: [asc, desc], default: asc }
  *     responses:
  *       200:
  *         description: A page of trains and pagination metadata.

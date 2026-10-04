@@ -8,6 +8,32 @@
 </section>
 
 <section class="trains-catalog">
+    <form class="trains-controls" id="trains-controls" role="search">
+        <label for="trains-search">
+            Search trains
+            <input id="trains-search" name="q" type="search" placeholder="Name, operator, type, power...">
+        </label>
+        <label for="trains-sort">
+            Sort by
+            <select id="trains-sort" name="sort">
+                <option value="name">Name</option>
+                <option value="operator">Operator</option>
+                <option value="type">Type</option>
+                <option value="speed">Top speed</option>
+                <option value="capacity">Capacity</option>
+                <option value="power">Power source</option>
+            </select>
+        </label>
+        <label for="trains-order">
+            Order
+            <select id="trains-order" name="order">
+                <option value="asc">A to Z / lowest first</option>
+                <option value="desc">Z to A / highest first</option>
+            </select>
+        </label>
+        <button type="submit">Search</button>
+    </form>
+
     <div class="trains-state" id="trains-loading">Loading trains...</div>
     <div class="trains-state trains-error" id="trains-error" hidden></div>
 

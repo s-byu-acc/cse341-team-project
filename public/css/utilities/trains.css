@@ -20,6 +20,45 @@
 .trains-catalog {
     display: block;
 
+    .trains-controls {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: end;
+        gap: var(--space-md);
+        margin-bottom: var(--space-lg);
+        padding-bottom: var(--space-md);
+        border-bottom: 1px solid #cfdbf7;
+
+        label {
+            display: grid;
+            gap: var(--space-xs);
+            color: var(--clr-text-secondary);
+            font-size: var(--font-size-sm);
+        }
+
+        input,
+        select,
+        button {
+            min-height: 2.75rem;
+            padding: var(--space-sm) var(--space-md);
+            border: 1px solid #b7c4e8;
+            border-radius: var(--radius-sm);
+            background: #fff;
+            color: var(--clr-text-primary);
+            font: inherit;
+        }
+
+        input {
+            min-width: min(20rem, 75vw);
+        }
+
+        button {
+            background: var(--clr-primary);
+            color: #fff;
+            cursor: pointer;
+        }
+    }
+
     .trains-state {
         margin-bottom: var(--space-md);
         color: var(--clr-text-secondary);
