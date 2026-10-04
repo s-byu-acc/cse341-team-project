@@ -1,15 +1,18 @@
 import app from './app.js';
 import { connectToDb } from './src/db/connect.js';
 
+
 /**
  * Declare Important Variables
  */
 const NODE_ENV = process.env.NODE_ENV?.toLowerCase() || 'production';
 const PORT = process.env.PORT || 3000;
 
+
 /**
  * Configure Express middleware
  */
+
 
 // Start Database and Server
 const startServer = async () => {
@@ -18,17 +21,27 @@ const startServer = async () => {
     await connectToDb();
     console.log('✓ Successfully connected to MongoDB');
 
+
     // 2. Start WebSocket Server in Development Mode (Live reload)
     if (NODE_ENV.includes('dev')) {
       const ws = await import('ws');
-      try {
-        const wsPort = parseInt(PORT) + 1;
-        const wsServer = new ws.WebSocketServer({ port: wsPort });
-        wsServer.on('listening', () => console.log(`WebSocket running on port ${wsPort}`));
-      } catch (wsErr) {
+      const wsPort = parseInt(PORT) + 1;
+      const wsServer = new ws.WebSocketServer({ port: wsPort });
+
+      wsServer.on('listening', () => {
+        console.log(`WebSocket running on port ${wsPort}`);
+      });
+
+      wsServer.on('error', (wsErr) => {
+        if (wsErr && wsErr.code === 'EADDRINUSE') {
+          console.warn(`WebSocket port ${wsPort} is already in use; continuing without live reload.`);
+          return;
+        }
+
         console.error('WebSocket error:', wsErr);
-      }
+      });
     }
+
 
     // 3. Start Express Application
     app.listen(PORT, () => {
@@ -39,5 +52,6 @@ const startServer = async () => {
     process.exit(1);
   }
 };
+
 
 startServer();
