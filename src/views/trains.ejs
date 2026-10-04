@@ -13,6 +13,12 @@
 
     <div class="trains-grid" id="trains-list"></div>
 
+    <nav class="trains-pagination" aria-label="Train results pages">
+        <button id="trains-previous" type="button" disabled>Previous</button>
+        <p id="trains-page-status" aria-live="polite"></p>
+        <button id="trains-next" type="button" disabled>Next</button>
+    </nav>
+
     <template id="train-card-template">
         <article class="train-card">
             <div class="train-image-wrap">
@@ -53,4 +59,5 @@
     </template>
 </section>
 
+<script src="/js/trains.js" defer></script>
 <%- include('./partials/footer') %>

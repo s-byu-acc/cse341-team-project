@@ -11,6 +11,7 @@
 @import 'utilities/home.css' layer(utilities);
 @import 'utilities/route-detail.css' layer(utilities);
 @import 'utilities/routes.css' layer(utilities);
+@import 'utilities/trains.css' layer(utilities);
 @import 'utilities/trips.css' layer(utilities);
 @import 'utilities/scenarios.css' layer(utilities);
 

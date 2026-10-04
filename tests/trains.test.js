@@ -48,4 +48,28 @@ describe('GET /api/trains', () => {
       ])
     );
   });
+
+  test('returns trains in pages of the requested size', async () => {
+    await getDb().collection('trains').insertMany(
+      Array.from({ length: 8 }, (_, index) => ({
+        id: `page-test-${index}`,
+        name: `Page Test ${index}`
+      }))
+    );
+
+    const firstPage = await request(app).get('/api/trains?page=1&limit=10');
+    const secondPage = await request(app).get('/api/trains?page=2&limit=10');
+
+    expect(firstPage.body.trains).toHaveLength(10);
+    expect(secondPage.body.trains).toHaveLength(2);
+    expect(secondPage.body.pagination).toMatchObject({
+      page: 2,
+      limit: 10,
+      totalItems: 12,
+      totalPages: 2,
+      hasNextPage: false,
+      hasPreviousPage: true
+    });
+  });
+
 });

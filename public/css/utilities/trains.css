@@ -29,6 +29,35 @@
         color: #8f1f1f;
     }
 
+    .trains-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-md);
+        margin-top: var(--space-lg);
+
+        p {
+            margin: 0;
+            color: var(--clr-text-secondary);
+            text-align: center;
+        }
+
+        button {
+            min-height: 2.75rem;
+            padding: var(--space-sm) var(--space-md);
+            border: 1px solid #b7c4e8;
+            border-radius: var(--radius-sm);
+            background: #fff;
+            color: var(--clr-text-primary);
+            cursor: pointer;
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+    }
+
     .trains-grid {
         display: grid;
         grid-template-columns: 1fr;
@@ -125,6 +154,20 @@
     .trains-catalog {
         .trains-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .trains-catalog {
+        .trains-pagination {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+
+            p {
+                grid-column: 1 / -1;
+                grid-row: 1;
+            }
         }
     }
 }
