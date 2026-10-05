@@ -30,15 +30,25 @@ export async function createBooking(bookingData) {
 
 /**
  * 2. Fetching all bookings from MongoDB sorted newest first
- * Wk05-feature-3: Updated to add pagination
+ * Wk05-feature-3: Updated to use pagination and filtering
  */
-export const getAllBookings = async (page = 1, limit = 10) => {
+export const getAllBookings = async (page = 1, limit = 10, filters = {}) => {
   const skip = (page - 1) * limit;
+  const query = {};
+
+  // Apply filters if they exist
+  if (filters.ticketClass) {
+    query.ticketClass = filters.ticketClass;
+  }
+  if (filters.startDate || filters.endDate) {
+    query.createdAt = {};
+    if (filters.startDate) query.createdAt.$gte = new Date(filters.startDate);
+    if (filters.endDate) query.createdAt.$lte = new Date(filters.endDate);
+  }
   
-  // Run both the data fetch and the total count fetch at the same time for performance
   const [data, totalItems] = await Promise.all([
-    Booking.find().sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
-    Booking.countDocuments()
+    Booking.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+    Booking.countDocuments(query)
   ]);
   
   return { data, totalItems };
@@ -46,13 +56,25 @@ export const getAllBookings = async (page = 1, limit = 10) => {
 
 /**
  * 3. Fetch bookings with at least one passenger matching the user's email.
- * Wk05-feature-3: Updated to add pagination
+ * Wk05-feature-3: Updated to use pagination and filtering
  */
-export const getBookingsByPassengerEmail = async (email, page = 1, limit = 10) => {
+export const getBookingsByPassengerEmail = async (email, page = 1, limit = 10, filters = {}) => {
   const skip = (page - 1) * limit;
+  
+  // Base query ensures they only see their own bookings
   const query = { 
     passengers: { $elemMatch: { email: email.toLowerCase() } } 
   };
+
+  // Apply additional filters
+  if (filters.ticketClass) {
+    query.ticketClass = filters.ticketClass;
+  }
+  if (filters.startDate || filters.endDate) {
+    query.createdAt = {};
+    if (filters.startDate) query.createdAt.$gte = new Date(filters.startDate);
+    if (filters.endDate) query.createdAt.$lte = new Date(filters.endDate);
+  }
   
   const [data, totalItems] = await Promise.all([
     Booking.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),

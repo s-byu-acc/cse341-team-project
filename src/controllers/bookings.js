@@ -93,13 +93,14 @@ export const confirmationPage = async (req, res) => {
 
 
 // 4. API Controller: Get All Bookings for Swagger & Web Services
-//Wk05-Features-3: updated it with pagination
+//Wk05-Features-3: updated to use pagination and filtering
 export async function getAllBookings(req, res) {
   if (!req.user) {
     return res.status(401).json({ error: 'Authentication required' });
   }
 
   try {
+    //strict validation
     let page = parseInt(req.query.page, 10);
     if (isNaN(page) || page < 1) {
       page = 1; // Default to 1 if invalid or negative
@@ -107,24 +108,26 @@ export async function getAllBookings(req, res) {
 
     // Extract and validate limit parameter
     let limit = parseInt(req.query.limit, 10);
-    if (isNaN(limit) || limit < 1) {
-      limit = 10; // Default to 10 if invalid or negative
-    }
-    if (limit > 50) {
-      limit = 50; // Set a hard cap so users cannot request a million records at once
-    }
+    if (isNaN(limit) || limit < 1) limit = 10; 
+    if (limit > 50) limit = 50; 
 
-    // Fetch paginated data and total count from the model
+    // Extract filtering parameters
+    const filters = {};
+    if (req.query.ticketClass) filters.ticketClass = req.query.ticketClass;
+    if (req.query.startDate) filters.startDate = req.query.startDate;
+    if (req.query.endDate) filters.endDate = req.query.endDate;
+
+    // Fetch paginated AND filtered data
     const result = req.user.role === 'admin'
-      ? await findAllBookings(page, limit)
-      : await findBookingsByPassengerEmail(req.user.email, page, limit);
+      ? await findAllBookings(page, limit, filters)
+      : await findBookingsByPassengerEmail(req.user.email, page, limit, filters);
 
     // Build the required metadata object
     const totalPages = Math.ceil(result.totalItems / limit);
     
     const response = {
       metadata: {
-        filters: {}, // I will fill this in PR 2
+        filters: filters, // Filters are now dynamically included in the metadata
         totalItems: result.totalItems,
         currentPage: page,
         itemsPerPage: limit,

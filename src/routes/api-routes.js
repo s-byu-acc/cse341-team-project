@@ -95,6 +95,23 @@ const router = Router();
  *           type: integer
  *           default: 10
  *         description: The number of bookings per page
+ *       - in: query
+ *         name: ticketClass
+ *         schema:
+ *           type: string
+ *         description: Filter bookings by ticket class (e.g., premium, first, standard)
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Filter bookings created on or after this date (YYYY-MM-DD)
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Filter bookings created on or before this date (YYYY-MM-DD)
  *     responses:
  *       200:
  *         description: A paginated list of bookings

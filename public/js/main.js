@@ -115,6 +115,49 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentPage = 1;
     let totalPages = 1;
 
+    // Wk5:Feature-3: Creting Filtering UI
+    const filterContainer = document.createElement('div');
+    filterContainer.innerHTML = `
+        <form id="filterBookingsForm" style="margin-bottom: 20px; display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+            <label style="display: flex; flex-direction: column;">
+                Ticket Class: 
+                <select name="ticketClass" style="padding: 5px;">
+                    <option value="">All</option>
+                    <option value="premium">Premium</option>
+                    <option value="first">First</option>
+                    <option value="standard">Standard</option>
+                </select>
+            </label>
+            <label style="display: flex; flex-direction: column;">
+                Start Date: 
+                <input type="date" name="startDate" style="padding: 5px;">
+            </label>
+            <label style="display: flex; flex-direction: column;">
+                End Date: 
+                <input type="date" name="endDate" style="padding: 5px;">
+            </label>
+            <button type="submit" style="padding: 6px 15px; cursor: pointer;">Apply Filters</button>
+            <button type="button" id="clearFiltersBtn" style="padding: 6px 15px; cursor: pointer;">Clear</button>
+        </form>
+    `;
+    tableEl.parentNode.insertBefore(filterContainer, tableEl);
+
+    const filterForm = document.getElementById('filterBookingsForm');
+
+    // Event listeners for filtering
+    filterForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        currentPage = 1; // Always reset to page 1 when applying a new filter
+        loadBookings();
+    });
+
+    document.getElementById('clearFiltersBtn').addEventListener('click', () => {
+        filterForm.reset();
+        currentPage = 1;
+        loadBookings();
+    });
+
+    //Table UI Features
     const showError = (message) => {
         errorEl.textContent = message;
         errorEl.classList.remove('d-none');
@@ -337,7 +380,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             tableEl.classList.add('d-none');
             paginationContainer.classList.add('d-none');
 
-            const response = await fetch(`/api/bookings?page=${currentPage}&limit=10`);
+            // Build dynamic URL with pagination and filters
+            let fetchUrl = `/api/bookings?page=${currentPage}&limit=10`;
+            
+            const tc = filterForm.elements.ticketClass.value;
+            const sd = filterForm.elements.startDate.value;
+            const ed = filterForm.elements.endDate.value;
+
+            if (tc) fetchUrl += `&ticketClass=${tc}`;
+            if (sd) fetchUrl += `&startDate=${sd}`;
+            if (ed) fetchUrl += `&endDate=${ed}`;
+
+            const response = await fetch(fetchUrl);
             const result = await response.json();
             
             if (!response.ok) {
