@@ -30,25 +30,37 @@ export async function createBooking(bookingData) {
 
 /**
  * 2. Fetching all bookings from MongoDB sorted newest first
+ * Wk05-feature-3: Updated to add pagination
  */
-export async function getAllBookings() {
-  return Booking.find({}).sort({ createdAt: -1 }).lean();
-}
+export const getAllBookings = async (page = 1, limit = 10) => {
+  const skip = (page - 1) * limit;
+  
+  // Run both the data fetch and the total count fetch at the same time for performance
+  const [data, totalItems] = await Promise.all([
+    Booking.find().sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+    Booking.countDocuments()
+  ]);
+  
+  return { data, totalItems };
+};
 
 /**
  * 3. Fetch bookings with at least one passenger matching the user's email.
+ * Wk05-feature-3: Updated to add pagination
  */
-export async function getBookingsByPassengerEmail(email) {
-  if (typeof email !== 'string' || !email.trim()) {
-    return [];
-  }
-
-  const escapedEmail = email.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-  return Booking.find({
-    'passengers.email': { $regex: `^${escapedEmail}$`, $options: 'i' }
-  }).sort({ createdAt: -1 }).lean();
-}
+export const getBookingsByPassengerEmail = async (email, page = 1, limit = 10) => {
+  const skip = (page - 1) * limit;
+  const query = { 
+    passengers: { $elemMatch: { email: email.toLowerCase() } } 
+  };
+  
+  const [data, totalItems] = await Promise.all([
+    Booking.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+    Booking.countDocuments(query)
+  ]);
+  
+  return { data, totalItems };
+};
 
 export async function updateBookingById(bookingCode, bookingData) {
   return Booking.findOneAndUpdate(

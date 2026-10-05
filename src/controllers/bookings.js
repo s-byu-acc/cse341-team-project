@@ -93,19 +93,37 @@ export const confirmationPage = async (req, res) => {
 
 
 // 4. API Controller: Get All Bookings for Swagger & Web Services
+//Wk05-Features-3: updated it with pagination
 export async function getAllBookings(req, res) {
   if (!req.user) {
     return res.status(401).json({ error: 'Authentication required' });
   }
 
-
   try {
-    const bookings = req.user.role === 'admin'
-      ? await findAllBookings()
-      : await findBookingsByPassengerEmail(req.user.email);
+    // Extract page and limit from the URL query string (default to page 1, 10 items)
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
 
+    // Fetch paginated data and total count from the model
+    const result = req.user.role === 'admin'
+      ? await findAllBookings(page, limit)
+      : await findBookingsByPassengerEmail(req.user.email, page, limit);
 
-    return res.status(200).json(bookings);
+    // Build the required metadata object
+    const totalPages = Math.ceil(result.totalItems / limit);
+    
+    const response = {
+      metadata: {
+        filters: {}, // I will fill this in PR 2
+        totalItems: result.totalItems,
+        currentPage: page,
+        itemsPerPage: limit,
+        totalPages: totalPages
+      },
+      data: result.data
+    };
+
+    return res.status(200).json(response);
   } catch (error) {
     console.error('Error getting bookings API:', error);
     return res.status(500).json({ error: 'Error retrieving bookings' });
