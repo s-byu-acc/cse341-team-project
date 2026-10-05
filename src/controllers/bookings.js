@@ -100,9 +100,19 @@ export async function getAllBookings(req, res) {
   }
 
   try {
-    // Extract page and limit from the URL query string (default to page 1, 10 items)
-    const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 10;
+    let page = parseInt(req.query.page, 10);
+    if (isNaN(page) || page < 1) {
+      page = 1; // Default to 1 if invalid or negative
+    }
+
+    // Extract and validate limit parameter
+    let limit = parseInt(req.query.limit, 10);
+    if (isNaN(limit) || limit < 1) {
+      limit = 10; // Default to 10 if invalid or negative
+    }
+    if (limit > 50) {
+      limit = 50; // Set a hard cap so users cannot request a million records at once
+    }
 
     // Fetch paginated data and total count from the model
     const result = req.user.role === 'admin'

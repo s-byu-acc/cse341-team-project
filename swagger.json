@@ -159,7 +159,7 @@
   "paths": {
     "/api/bookings": {
       "get": {
-        "summary": "Retrieve all bookings",
+        "summary": "Retrieve all bookings (Paginated)",
         "tags": [
           "Bookings"
         ],
@@ -168,33 +168,75 @@
             "sessionCookieAuth": []
           }
         ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "The page number to retrieve"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "The number of bookings per page"
+          }
+        ],
         "responses": {
           "200": {
-            "description": "A list of all customer bookings",
+            "description": "A paginated list of bookings",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "bookingCode": {
-                        "type": "string"
-                      },
-                      "scheduleId": {
-                        "type": "string"
-                      },
-                      "routeId": {
-                        "type": "string"
-                      },
-                      "ticketClass": {
-                        "type": "string"
-                      },
-                      "selectedDay": {
-                        "type": "string"
-                      },
-                      "totalAmount": {
-                        "type": "number"
+                  "type": "object",
+                  "properties": {
+                    "metadata": {
+                      "type": "object",
+                      "properties": {
+                        "totalItems": {
+                          "type": "integer"
+                        },
+                        "currentPage": {
+                          "type": "integer"
+                        },
+                        "itemsPerPage": {
+                          "type": "integer"
+                        },
+                        "totalPages": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "bookingCode": {
+                            "type": "string"
+                          },
+                          "scheduleId": {
+                            "type": "string"
+                          },
+                          "tripId": {
+                            "type": "string"
+                          },
+                          "ticketClass": {
+                            "type": "string"
+                          },
+                          "selectedDay": {
+                            "type": "string"
+                          },
+                          "totalAmount": {
+                            "type": "number"
+                          }
+                        }
                       }
                     }
                   }
@@ -203,14 +245,7 @@
             }
           },
           "401": {
-            "description": "Login is required.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AuthError"
-                }
-              }
-            }
+            "description": "Login is required"
           },
           "500": {
             "description": "Server error"
@@ -398,19 +433,153 @@
     },
     "/api/trips": {
       "get": {
-        "summary": "Get all trips",
+        "summary": "Get a filtered page of trips",
         "tags": [
           "Trips"
         ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            }
+          },
+          {
+            "in": "query",
+            "name": "region",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by trip region."
+          },
+          {
+            "in": "query",
+            "name": "season",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by best season."
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search trip names and descriptions."
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "name",
+                "createdAt"
+              ],
+              "default": "name"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "asc"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "A list of trips.",
+            "description": "A page of trips and pagination metadata.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Trip"
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Trip"
+                      }
+                    },
+                    "query": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer"
+                        },
+                        "limit": {
+                          "type": "integer"
+                        },
+                        "region": {
+                          "type": "string"
+                        },
+                        "season": {
+                          "type": "string"
+                        },
+                        "q": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer"
+                        },
+                        "limit": {
+                          "type": "integer"
+                        },
+                        "totalItems": {
+                          "type": "integer"
+                        },
+                        "totalPages": {
+                          "type": "integer"
+                        },
+                        "hasNextPage": {
+                          "type": "boolean"
+                        },
+                        "hasPreviousPage": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "filters": {
+                      "type": "object",
+                      "properties": {
+                        "regions": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "seasons": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               }
