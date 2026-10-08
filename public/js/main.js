@@ -95,19 +95,69 @@ document.addEventListener('DOMContentLoaded', () => {
     hookScenarioTasks();
 });
 
-document.addEventListener('DOMContentLoaded', async () => {
-  const tableEl = document.getElementById('bookingsTable');
-  if (!tableEl) return;
-
-  const loadingEl = document.getElementById('loading');
-  const errorEl = document.getElementById('error-message');
+//Wk3:Feature:3: Bookings
+// 1. Client-side dynamically load on page ge 
+document.addEventListener('DOMContentLoaded', async () => { 
+    const tableEl = document.getElementById('bookingsTable');
+    if (!tableEl) return;
+    
+    const loadingEl = document.getElementById('loading');
+    const errorEl = document.getElementById('error-message');
     const statusEl = document.getElementById('booking-status');
-  const tbodyEl = document.getElementById('bookingsTableBody');
+    const tbodyEl = document.getElementById('bookingsTableBody');
     const dialogEl = document.getElementById('editBookingDialog');
     const formEl = document.getElementById('editBookingForm');
     const passengersEl = document.getElementById('editBookingPassengers');
+    
+    // FIX 2: Changed const to let so they can be updated
+    // Wk05:Pagination features
     let bookings = [];
+    let currentPage = 1;
+    let totalPages = 1;
 
+    // Wk5:Feature-3: Creting Filtering UI
+    const filterContainer = document.createElement('div');
+    filterContainer.innerHTML = `
+        <form id="filterBookingsForm" style="margin-bottom: 20px; display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+            <label style="display: flex; flex-direction: column;">
+                Ticket Class: 
+                <select name="ticketClass" style="padding: 5px;">
+                    <option value="">All</option>
+                    <option value="premium">Premium</option>
+                    <option value="first">First</option>
+                    <option value="standard">Standard</option>
+                </select>
+            </label>
+            <label style="display: flex; flex-direction: column;">
+                Start Date: 
+                <input type="date" name="startDate" style="padding: 5px;">
+            </label>
+            <label style="display: flex; flex-direction: column;">
+                End Date: 
+                <input type="date" name="endDate" style="padding: 5px;">
+            </label>
+            <button type="submit" style="padding: 6px 15px; cursor: pointer;">Apply Filters</button>
+            <button type="button" id="clearFiltersBtn" style="padding: 6px 15px; cursor: pointer;">Clear</button>
+        </form>
+    `;
+    tableEl.parentNode.insertBefore(filterContainer, tableEl);
+
+    const filterForm = document.getElementById('filterBookingsForm');
+
+    // Event listeners for filtering
+    filterForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        currentPage = 1; // Always reset to page 1 when applying a new filter
+        loadBookings();
+    });
+
+    document.getElementById('clearFiltersBtn').addEventListener('click', () => {
+        filterForm.reset();
+        currentPage = 1;
+        loadBookings();
+    });
+
+    //Table UI Features
     const showError = (message) => {
         errorEl.textContent = message;
         errorEl.classList.remove('d-none');
@@ -238,8 +288,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             await sendBookingRequest(`/api/bookings/${encodeURIComponent(booking.bookingCode)}`, {
                 method: 'DELETE'
             });
-            bookings = bookings.filter((item) => item.bookingCode !== booking.bookingCode);
-            renderBookings();
+            // FIX 3 (for delete): Just reload the current page from the server
+            // Wk05:Pagination feature
+            loadBookings();
             showStatus('Booking deleted.');
         } catch (error) {
             showError(error.message);
@@ -273,15 +324,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         try {
-            const result = await sendBookingRequest(`/api/bookings/${encodeURIComponent(bookingCode)}`, {
+            await sendBookingRequest(`/api/bookings/${encodeURIComponent(bookingCode)}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(bookingData)
             });
-            bookings = bookings.map((booking) =>
-                booking.bookingCode === result.booking.bookingCode ? result.booking : booking
-            );
-            renderBookings();
+            
+            // FIX 3 (for edit): Just reload the current page from the server
+            // Wk05:Pagination feature
+            loadBookings();
             dialogEl.close();
             showStatus('Booking updated.');
         } catch (error) {
@@ -291,25 +342,92 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-  try {
-    const response = await fetch('/api/bookings');
-        const result = await response.json();
-        if (!response.ok) {
-            throw new Error(result.error || 'Unable to load bookings.');
-    }
+    //Wk5:Feature-3:pagination UI features
+    const paginationContainer = document.createElement('div');
+    paginationContainer.id = 'pagination-controls';
+    // Updated layout to stack items vertically and center them
+    paginationContainer.style = 'display: flex; flex-direction: column; align-items: center; margin-top: 15px; gap: 10px;';
+    paginationContainer.classList.add('d-none');
+    paginationContainer.innerHTML = `
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <button id="prevPageBtn" type="button" style="padding: 5px 15px;">Previous</button>
+            <span id="pageIndicator" style="font-weight: bold;">Page 1</span>
+            <button id="nextPageBtn" type="button" style="padding: 5px 15px;">Next</button>
+        </div>
+        <div id="totalBookingsSummary" style="color: #666;"></div>
+    `;
+    tableEl.parentNode.insertBefore(paginationContainer, tableEl.nextSibling);
 
-        bookings = result;
-        renderBookings();
-  } catch (err) {
-    console.error(err);
-        loadingEl.classList.add('d-none');
-        showError(err.message || 'Unable to load bookings.');
-  }
+    document.getElementById('prevPageBtn').addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            loadBookings();
+        }
+    });
+
+    document.getElementById('nextPageBtn').addEventListener('click', () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            loadBookings();
+        }
+    });
+
+    // FIX 1: Reusable function moved INSIDE the DOMContentLoaded listener
+    // Wk05:Pagination feature
+    const loadBookings = async () => {
+        try {
+            loadingEl.classList.remove('d-none');
+            tableEl.classList.add('d-none');
+            paginationContainer.classList.add('d-none');
+
+            // Build dynamic URL with pagination and filters
+            let fetchUrl = `/api/bookings?page=${currentPage}&limit=10`;
+            
+            const tc = filterForm.elements.ticketClass.value;
+            const sd = filterForm.elements.startDate.value;
+            const ed = filterForm.elements.endDate.value;
+
+            if (tc) fetchUrl += `&ticketClass=${tc}`;
+            if (sd) fetchUrl += `&startDate=${sd}`;
+            if (ed) fetchUrl += `&endDate=${ed}`;
+
+            const response = await fetch(fetchUrl);
+            const result = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(result.error || 'Unable to load bookings.');
+            }
+
+            bookings = result.data;
+            currentPage = result.metadata.currentPage;
+            totalPages = result.metadata.totalPages;
+
+            renderBookings(); 
+
+            document.getElementById('pageIndicator').textContent = `Page ${currentPage} of ${totalPages}`;
+            // ADD THIS NEW LINE to display the total bookings found:
+            document.getElementById('totalBookingsSummary').textContent = `${result.metadata.totalItems} booking(s) found`;
+            document.getElementById('prevPageBtn').disabled = currentPage === 1;
+            document.getElementById('nextPageBtn').disabled = currentPage === totalPages || totalPages === 0;
+
+            if (totalPages > 0) {
+                paginationContainer.classList.remove('d-none');
+            }
+
+        } catch (err) {
+            console.error(err);
+            loadingEl.classList.add('d-none');
+            showError(err.message || 'Unable to load bookings.');
+        }
+    };
+
+    // Initialize page
+    loadBookings();
 });
 
 
 //Wk4:Feature:3: Protected User-Admin-Page
- // 1. Fetch Users dynamically on page load
+// 1. Fetch Users dynamically on page load
 async function loadUsers() {
     const tbody = document.getElementById('userTableBody');
     if (!tbody) return; // Prevents errors on pages that do not have the user table

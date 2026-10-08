@@ -78,40 +78,80 @@ const router = Router();
  * @swagger
  * /api/bookings:
  *   get:
- *     summary: Retrieve all bookings
+ *     summary: Retrieve all bookings (Paginated)
  *     tags: [Bookings]
  *     security:
  *       - sessionCookieAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: The page number to retrieve
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: The number of bookings per page
+ *       - in: query
+ *         name: ticketClass
+ *         schema:
+ *           type: string
+ *         description: Filter bookings by ticket class (e.g., premium, first, standard)
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Filter bookings created on or after this date (YYYY-MM-DD)
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Filter bookings created on or before this date (YYYY-MM-DD)
  *     responses:
  *       200:
- *         description: A list of all customer bookings
+ *         description: A paginated list of bookings
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   bookingCode:
- *                     type: string
- *                   scheduleId:
- *                     type: string
- *                   tripId:
- *                     type: string
- *                   ticketClass:
- *                     type: string
- *                   selectedDay:
- *                     type: string
- *                   totalAmount:
- *                     type: number
+ *               type: object
+ *               properties:
+ *                 metadata:
+ *                   type: object
+ *                   properties:
+ *                     totalItems:
+ *                       type: integer
+ *                     currentPage:
+ *                       type: integer
+ *                     itemsPerPage:
+ *                       type: integer
+ *                     totalPages:
+ *                       type: integer
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       bookingCode:
+ *                         type: string
+ *                       scheduleId:
+ *                         type: string
+ *                       tripId:
+ *                         type: string
+ *                       ticketClass:
+ *                         type: string
+ *                       selectedDay:
+ *                         type: string
+ *                       totalAmount:
+ *                         type: number
  *       500:
  *         description: Server error
  *       401:
- *         description: Login is required.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/AuthError'
+ *         description: Login is required
  */
 router.get("/", requireApiLogin(), getAllBookings);
 
