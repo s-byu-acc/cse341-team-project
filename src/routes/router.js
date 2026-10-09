@@ -5,6 +5,7 @@ import authRouter from './auth.js';
 import { homePage, aboutPage, testErrorPage } from './index.js';
 import { bookingsAdminPage } from '../controllers/bookings.js';
 import { requirePageRole } from '../middleware/auth.js';
+import { trainsPage } from './trains.js';
 
 const router = Router();
 
@@ -20,6 +21,9 @@ router.use('/', authRouter);
 
 // About page
 router.get('/about', aboutPage);
+
+// Train catalog
+router.get('/trains', trainsPage);
 
 // Trips backed by the trips API.
 router.use('/trips', tripsRouter);

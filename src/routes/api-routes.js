@@ -16,9 +16,32 @@ import {
 } from '../controllers/schedules.js';
 
 import { getAllTrips, getTripById } from '../controllers/trips.js';
+import { trainsApi } from './trains.js';
 import { requireApiLogin, requireApiRole } from '../middleware/auth.js';
 
 const router = Router();
+
+router.get('/trains', trainsApi);
+
+/**
+ * @swagger
+ * /api/trains:
+ *   get:
+ *     summary: Get a page of trains
+ *     tags: [Trains]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema: { type: integer, minimum: 1, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, minimum: 1, maximum: 50, default: 10 }
+ *     responses:
+ *       200:
+ *         description: A page of trains and pagination metadata.
+ *       500:
+ *         description: Unable to retrieve trains.
+ */
 
 /**
  * @openapi
