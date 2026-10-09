@@ -1,9 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('trains-controls');
+    if (!form) return;
+
+    const searchInput = document.getElementById('trains-search');
+    const sortSelect = document.getElementById('trains-sort');
+    const orderSelect = document.getElementById('trains-order');
     const loading = document.getElementById('trains-loading');
     const error = document.getElementById('trains-error');
     const list = document.getElementById('trains-list');
-    if (!list) return;
-
     const previousButton = document.getElementById('trains-previous');
     const nextButton = document.getElementById('trains-next');
     const pageStatus = document.getElementById('trains-page-status');
@@ -40,7 +44,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const loadTrains = async () => {
-        const params = new URLSearchParams({ page: String(page), limit: '10' });
+        const params = new URLSearchParams({
+            page: String(page),
+            limit: '10',
+            q: searchInput.value.trim(),
+            sort: sortSelect.value,
+            order: orderSelect.value
+        });
 
         loading.hidden = false;
         loading.textContent = 'Loading trains...';
@@ -59,9 +69,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             loading.hidden = result.trains.length > 0;
             if (result.trains.length === 0) {
-                loading.textContent = 'No trains found.';
+                loading.textContent = 'No trains match your search.';
             }
-            pageStatus.textContent = `${pagination.totalItems} trains - Page ${pagination.page} of ${Math.max(pagination.totalPages, 1)}`;
+            pageStatus.textContent = `${pagination.totalItems} trains · Page ${pagination.page} of ${Math.max(pagination.totalPages, 1)}`;
             previousButton.disabled = !pagination.hasPreviousPage;
             nextButton.disabled = !pagination.hasNextPage;
         } catch (requestError) {
@@ -71,6 +81,19 @@ document.addEventListener('DOMContentLoaded', () => {
             pageStatus.textContent = '';
         }
     };
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        page = 1;
+        loadTrains();
+    });
+
+    [sortSelect, orderSelect].forEach((select) => {
+        select.addEventListener('change', () => {
+            page = 1;
+            loadTrains();
+        });
+    });
 
     previousButton.addEventListener('click', () => {
         page -= 1;

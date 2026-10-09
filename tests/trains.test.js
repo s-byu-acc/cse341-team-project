@@ -72,4 +72,11 @@ describe('GET /api/trains', () => {
     });
   });
 
+  test('searches train data and sorts matching results', async () => {
+    const response = await request(app).get('/api/trains?q=JR&sort=name&order=desc');
+
+    expect(response.status).toBe(200);
+    expect(response.body.trains.map((train) => train.id)).toEqual(['series-e353', 'series-287', 'kiha-261']);
+    expect(response.body.query).toMatchObject({ q: 'JR', sort: 'name', order: 'desc' });
+  });
 });
