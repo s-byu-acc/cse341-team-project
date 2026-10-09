@@ -16,6 +16,7 @@ import {
 } from '../controllers/schedules.js';
 
 import { getAllTrips, getTripById } from '../controllers/trips.js';
+import { getStations, getStation, getTripStations } from '../controllers/stations.js';
 import { trainsApi } from './trains.js';
 import { requireApiLogin, requireApiRole } from '../middleware/auth.js';
 
@@ -359,6 +360,10 @@ router.delete('/:bookingCode', requireApiLogin(), deleteBooking);
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/trips', getAllTrips);
+
+router.get('/stations', getStations);
+router.get('/stations/:id', getStation);
+router.get('/trips/:id/stations', getTripStations);
 
 /**
  * @swagger
