@@ -257,3 +257,66 @@ describe('PR 2: Write Operations (POST, PUT, DELETE /api/bookings)', () => {
     expect(deletedBooking).toBeNull();
   });
 });
+
+
+/*C. TEST FOR PR 3 PAGINATION AND FILTERING OPERATION  */
+describe('PR 3: Pagination and Filtering (GET /api/bookings query params)', () => {
+  //Test-1 expected 200-success a body response of 1 page of 2
+  test('paginates results and returns correct metadata', async () => {
+    // Request page 1 with a limit of 1 item
+    const response = await request(app)
+      .get('/api/bookings?page=1&limit=1')
+      .set('Cookie', adminCookie);
+
+    expect(response.status).toBe(200);
+    expect(response.body.data).toHaveLength(1);
+    
+    // Validate the metadata object we built in Week 05
+    expect(response.body.metadata).toBeDefined();
+    expect(response.body.metadata.currentPage).toBe(1);
+    expect(response.body.metadata.itemsPerPage).toBe(1);
+    // Since we seeded 2 bookings total, limiting to 1 per page means there are 2 pages
+    expect(response.body.metadata.totalItems).toBe(2);
+    expect(response.body.metadata.totalPages).toBe(2);
+  });
+
+
+  //Test-2 expected 200-success a body response of filtering by ticketclass id
+  test('filters bookings by ticketClass', async () => {
+    const response = await request(app)
+      .get('/api/bookings?ticketClass=premium')
+      .set('Cookie', adminCookie);
+
+    expect(response.status).toBe(200);
+    // Only TEST-CUSTOMER-01 is premium
+    expect(response.body.data).toHaveLength(1);
+    expect(response.body.data[0].bookingCode).toBe('TEST-CUSTOMER-01');
+    expect(response.body.metadata.filters.ticketClass).toBe('premium');
+  });
+
+  
+  //Test-3 expected 200-success a body response of filtering by date range
+  test('filters bookings by startDate and endDate', async () => {
+    // TEST-OTHER-02 was created on 2026-10-02. This date range should only catch that one.
+    const response = await request(app)
+      .get('/api/bookings?startDate=2026-10-02&endDate=2026-10-03')
+      .set('Cookie', adminCookie);
+
+    expect(response.status).toBe(200);
+    expect(response.body.data).toHaveLength(1);
+    expect(response.body.data[0].bookingCode).toBe('TEST-OTHER-02');
+  });
+
+  //Test-4 expected 200-success for an empty array when no booking match.
+  test('returns an empty array and zero totalItems when no results match', async () => {
+    // We didn't seed any 'first' class tickets, so this should return empty
+    const response = await request(app)
+      .get('/api/bookings?ticketClass=first')
+      .set('Cookie', adminCookie);
+
+    expect(response.status).toBe(200);
+    expect(response.body.data).toBeInstanceOf(Array);
+    expect(response.body.data).toHaveLength(0);
+    expect(response.body.metadata.totalItems).toBe(0);
+  });
+});
