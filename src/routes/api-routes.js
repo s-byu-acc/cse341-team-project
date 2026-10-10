@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
     getAllBookings,
+    getSingleBooking,
     updateBooking,
     deleteBooking
 } from "../controllers/bookings.js";
@@ -187,6 +188,34 @@ router.get('/trains', trainsApi);
  *         description: Login is required
  */
 router.get("/", requireApiLogin(), getAllBookings);
+
+//Added in Wk06: Add Swagger annotations and route definition
+/**
+ * @swagger
+ * /api/bookings/{bookingCode}:
+ *   get:
+ *     summary: Retrieve a single booking by bookingCode
+ *     tags: [Bookings]
+ *     security:
+ *       - sessionCookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: bookingCode
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique booking code
+ *     responses:
+ *       200:
+ *         description: Booking details retrieved successfully
+ *       401:
+ *         description: Login required
+ *       403:
+ *         description: Forbidden (customer accessing another user's booking)
+ *       404:
+ *         description: Booking not found
+ */
+router.get("/:bookingCode", requireApiLogin(), getSingleBooking);
 
 /**
  * @openapi
