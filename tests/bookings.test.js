@@ -95,7 +95,7 @@ beforeEach(async () => {
 //   });
 // });
 
-/* B. TEST FOR PR 1 */
+/* B. TEST FOR PR 1 READ OPERATION */
 describe('PR 1: Read Operations (GET /api/bookings)', () => {
   // test-1 expected 401 user not found/not login
   test('returns 401 Unauthorized if no session cookie is provided', async () => {
@@ -160,5 +160,100 @@ describe('PR 1: Read Operations (GET /api/bookings)', () => {
       .set('Cookie', adminCookie);
 
     expect(response.status).toBe(404);
+  });
+});
+
+/*C. TEST FOR PR 2 WRITE OPERATION  */
+
+describe('PR 2: Write Operations (POST, PUT, DELETE /api/bookings)', () => {
+  //test-1 expected 200-success and 201-created for new booking
+  test('creates a new booking and saves it to the temporary database', async () => {
+    const newBookingData = {
+      scheduleId: '3',
+      tripId: 'night-rider',
+      ticketClass: 'standard',
+      selectedDay: 'wednesday',
+      passengers: [{ firstName: 'New', lastName: 'Passenger', email: 'customer@kizunarail.com', phone: '555-555-5555' }],
+      totalAmount: 12000
+    };
+
+    // 1. Send the HTTP request
+    const response = await request(app)
+      .post('/api/bookings')
+      .set('Cookie', customerCookie)
+      .send(newBookingData);
+
+    // Expect a 302 Redirect based on the controller logic
+    expect(response.status).toBe(302);
+    
+    // Extract the bookingCode from the end of the redirect URL (/routes/confirmation/CODE)
+    const redirectUrl = response.headers.location;
+    expect(redirectUrl).toBeDefined();
+    
+    const createdCode = redirectUrl.split('/').pop(); 
+    expect(createdCode).toBeTruthy();
+
+    // 2. Query the database directly to prove it was saved
+    const db = getDb();
+    const savedBooking = await db.collection('bookings').findOne({ bookingCode: createdCode });
+    
+    expect(savedBooking).not.toBeNull();
+    expect(savedBooking.tripId).toBe('night-rider');
+  });
+  
+
+  // test-2 expected 200-success edited existing booking
+  test('updates an existing booking and verifies the database change', async () => {
+    // Provide the complete booking object to pass validation
+    const updateData = {
+      scheduleId: '1',
+      tripId: 'alpine-panorama',
+      ticketClass: 'first', // The updated value
+      selectedDay: 'monday',
+      passengers: [{ firstName: 'John', lastName: 'Doe', email: 'customer@kizunarail.com', phone: '000-000-0000' }],
+      totalAmount: 15000 // The updated value
+    };
+
+    // 1. Send the HTTP request
+    const response = await request(app)
+      .put('/api/bookings/TEST-CUSTOMER-01')
+      .set('Cookie', customerCookie)
+      .send(updateData);
+
+    expect(response.status).toBe(200);
+
+    // 2. Query the database directly to prove the update applied
+    const db = getDb();
+    const updatedBooking = await db.collection('bookings').findOne({ bookingCode: 'TEST-CUSTOMER-01' });
+    
+    expect(updatedBooking.ticketClass).toBe('first');
+    expect(updatedBooking.totalAmount).toBe(15000);
+  });
+
+  //test-3 expected 403-forbidden user doesn't have access to edit booking
+  test('returns 403 Forbidden when customer tries to update another user booking', async () => {
+    const response = await request(app)
+      .put('/api/bookings/TEST-OTHER-02')
+      .set('Cookie', customerCookie)
+      .send({ ticketClass: 'first' });
+
+    expect(response.status).toBe(403);
+  });
+
+
+  //test-4 expected 200-success booking was deleted.
+  test('deletes a booking and verifies it is removed from the database', async () => {
+    // 1. Send the HTTP request (Admin deleting the second test booking)
+    const response = await request(app)
+      .delete('/api/bookings/TEST-OTHER-02')
+      .set('Cookie', adminCookie);
+
+    expect(response.status).toBe(200);
+
+    // 2. Query the database directly to prove it no longer exists
+    const db = getDb();
+    const deletedBooking = await db.collection('bookings').findOne({ bookingCode: 'TEST-OTHER-02' });
+    
+    expect(deletedBooking).toBeNull();
   });
 });
