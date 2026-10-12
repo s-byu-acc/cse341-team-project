@@ -157,6 +157,118 @@
     }
   ],
   "paths": {
+    "/api/stations": {
+      "get": {
+        "summary": "Get all stations",
+        "tags": [
+          "Stations"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of stations."
+          }
+        }
+      }
+    },
+    "/api/stations/{id}": {
+      "get": {
+        "summary": "Get a station by ID",
+        "tags": [
+          "Stations"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The requested station."
+          },
+          "404": {
+            "description": "Station not found."
+          }
+        }
+      }
+    },
+    "/api/trains": {
+      "get": {
+        "summary": "Get a searchable, sorted page of trains",
+        "tags": [
+          "Trains"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "description": "Search train IDs, names, operators, types, power sources, and descriptions.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "name",
+                "operator",
+                "type",
+                "speed",
+                "capacity",
+                "power"
+              ],
+              "default": "name"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "asc"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of trains and pagination metadata."
+          },
+          "500": {
+            "description": "Unable to retrieve trains."
+          }
+        }
+      }
+    },
     "/api/bookings": {
       "get": {
         "summary": "Retrieve all bookings",
@@ -184,7 +296,7 @@
                       "scheduleId": {
                         "type": "string"
                       },
-                      "routeId": {
+                      "tripId": {
                         "type": "string"
                       },
                       "ticketClass": {
@@ -398,19 +510,153 @@
     },
     "/api/trips": {
       "get": {
-        "summary": "Get all trips",
+        "summary": "Get a filtered page of trips",
         "tags": [
           "Trips"
         ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            }
+          },
+          {
+            "in": "query",
+            "name": "region",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by trip region."
+          },
+          {
+            "in": "query",
+            "name": "season",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by best season."
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search trip names and descriptions."
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "name",
+                "createdAt"
+              ],
+              "default": "name"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "asc"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "A list of trips.",
+            "description": "A page of trips and pagination metadata.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Trip"
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Trip"
+                      }
+                    },
+                    "query": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer"
+                        },
+                        "limit": {
+                          "type": "integer"
+                        },
+                        "region": {
+                          "type": "string"
+                        },
+                        "season": {
+                          "type": "string"
+                        },
+                        "q": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer"
+                        },
+                        "limit": {
+                          "type": "integer"
+                        },
+                        "totalItems": {
+                          "type": "integer"
+                        },
+                        "totalPages": {
+                          "type": "integer"
+                        },
+                        "hasNextPage": {
+                          "type": "boolean"
+                        },
+                        "hasPreviousPage": {
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "filters": {
+                      "type": "object",
+                      "properties": {
+                        "regions": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "seasons": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -476,6 +722,32 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/trips/{id}/stations": {
+      "get": {
+        "summary": "Get the origin and destination stations for a trip",
+        "tags": [
+          "Trips"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The stations connected to the requested trip."
+          },
+          "404": {
+            "description": "Trip or a referenced station not found."
           }
         }
       }

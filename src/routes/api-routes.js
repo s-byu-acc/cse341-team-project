@@ -16,12 +16,45 @@ import {
 } from '../controllers/schedules.js';
 
 import { getAllTrips, getTripById } from '../controllers/trips.js';
+import { getAllStations, getStationById, getTripStations } from '../controllers/stations.js';
 import { trainsApi } from './trains.js';
 import { requireApiLogin, requireApiRole } from '../middleware/auth.js';
 
 const router = Router();
 
 router.get('/trains', trainsApi);
+
+/**
+ * @swagger
+ * /api/stations:
+ *   get:
+ *     summary: Get all stations
+ *     tags: [Stations]
+ *     responses:
+ *       200:
+ *         description: A list of stations.
+ */
+router.get('/stations', getAllStations);
+
+/**
+ * @swagger
+ * /api/stations/{id}:
+ *   get:
+ *     summary: Get a station by ID
+ *     tags: [Stations]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: The requested station.
+ *       404:
+ *         description: Station not found.
+ */
+router.get('/stations/:id', getStationById);
 
 /**
  * @swagger
@@ -395,6 +428,26 @@ router.get('/trips', getAllTrips);
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/trips/:id', getTripById);
+
+/**
+ * @swagger
+ * /api/trips/{id}/stations:
+ *   get:
+ *     summary: Get the origin and destination stations for a trip
+ *     tags: [Trips]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: The stations connected to the requested trip.
+ *       404:
+ *         description: Trip or a referenced station not found.
+ */
+router.get('/trips/:id/stations', getTripStations);
 
 
 /**
