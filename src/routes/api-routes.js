@@ -1,6 +1,8 @@
 import { Router } from "express";
 import {
     getAllBookings,
+    getSingleBooking,
+    processBookingRequest,
     updateBooking,
     deleteBooking
 } from "../controllers/bookings.js";
@@ -144,42 +146,134 @@ router.get('/stations/:id', getStationById);
  * @swagger
  * /api/bookings:
  *   get:
- *     summary: Retrieve all bookings
+ *     summary: Retrieve all bookings (Paginated)
  *     tags: [Bookings]
  *     security:
  *       - sessionCookieAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: The page number to retrieve
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: The number of bookings per page
+ *       - in: query
+ *         name: ticketClass
+ *         schema:
+ *           type: string
+ *         description: Filter bookings by ticket class (e.g., premium, first, standard)
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Filter bookings created on or after this date (YYYY-MM-DD)
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Filter bookings created on or before this date (YYYY-MM-DD)
  *     responses:
  *       200:
- *         description: A list of all customer bookings
+ *         description: A paginated list of bookings
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   bookingCode:
- *                     type: string
- *                   scheduleId:
- *                     type: string
- *                   tripId:
- *                     type: string
- *                   ticketClass:
- *                     type: string
- *                   selectedDay:
- *                     type: string
- *                   totalAmount:
- *                     type: number
+ *               type: object
+ *               properties:
+ *                 metadata:
+ *                   type: object
+ *                   properties:
+ *                     totalItems:
+ *                       type: integer
+ *                     currentPage:
+ *                       type: integer
+ *                     itemsPerPage:
+ *                       type: integer
+ *                     totalPages:
+ *                       type: integer
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       bookingCode:
+ *                         type: string
+ *                       scheduleId:
+ *                         type: string
+ *                       tripId:
+ *                         type: string
+ *                       ticketClass:
+ *                         type: string
+ *                       selectedDay:
+ *                         type: string
+ *                       totalAmount:
+ *                         type: number
  *       500:
  *         description: Server error
  *       401:
- *         description: Login is required.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/AuthError'
+ *         description: Login is required
  */
 router.get("/", requireApiLogin(), getAllBookings);
+
+//Added in Wk06: Add Swagger annotations and route definition
+/**
+ * @swagger
+ * /api/bookings:
+ *   post:
+ *     summary: Create a new booking
+ *     tags: [Bookings]
+ *     security:
+ *       - sessionCookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             # (You can expand this schema later to match your PUT schema)
+ *     responses:
+ *       201:
+ *         description: Booking created successfully.
+ *       401:
+ *         description: Login is required.
+ */
+router.post("/", requireApiLogin(), processBookingRequest);
+
+/**
+ * @swagger
+ * /api/bookings/{bookingCode}:
+ *   get:
+ *     summary: Retrieve a single booking by bookingCode
+ *     tags: [Bookings]
+ *     security:
+ *       - sessionCookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: bookingCode
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique booking code
+ *     responses:
+ *       200:
+ *         description: Booking details retrieved successfully
+ *       401:
+ *         description: Login required
+ *       403:
+ *         description: Forbidden (customer accessing another user's booking)
+ *       404:
+ *         description: Booking not found
+ */
+router.get("/:bookingCode", requireApiLogin(), getSingleBooking);
+
 
 /**
  * @openapi

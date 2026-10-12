@@ -3,8 +3,8 @@
 	"dependencies": {
 		"ejs": "^3.1.10",
 		"express": "^5.1.0",
-		"mongoose": "^9.10.1",
 		"mongodb": "^7.1.0",
+		"mongoose": "^9.10.1",
 		"swagger-ui-express": "^5.0.1"
 	},
 	"scripts": {
@@ -15,14 +15,17 @@
 		"swagger": "node swagger.js",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "vitest"
 	},
 	"type": "module",
 	"version": "1.0.0",
 	"devDependencies": {
 		"eslint": "^10.11.0",
+		"mongodb-memory-server": "^11.3.0",
 		"nodemon": "^3.1.10",
+		"supertest": "^7.3.1",
 		"swagger-jsdoc": "^6.3.0",
+		"vitest": "^5.0.3",
 		"ws": "^8.18.3"
 	}
 }
