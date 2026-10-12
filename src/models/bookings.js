@@ -98,7 +98,17 @@ export async function deleteBookingById(bookingCode) {
 
 /**
  * 4. Fetching a single booking by its generated booking code
+ * Wk06: Assignment Fixing
  */
-export async function getBookingById(bookingCode) {
-  return Booking.findOne({ bookingCode }).lean();
-}
+export const getBookingById = async (bookingCode) => {
+  // Use bookingCode for the lookup, not the MongoDB ObjectId
+  return await Booking.findOne({ bookingCode: bookingCode }).lean();
+};
+
+export const canManageBooking = (user, booking) => {
+  // Admins can see everything
+  if (user.role === 'admin') return true;
+  // Customers can only see the booking if their email is in the passenger list
+  return booking.passengers.some(p => p.email === user.email);
+};
+
