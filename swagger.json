@@ -157,6 +157,79 @@
     }
   ],
   "paths": {
+    "/api/trains": {
+      "get": {
+        "summary": "Get a searchable, sorted page of trains",
+        "tags": [
+          "Trains"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "description": "Search train IDs, names, operators, types, power sources, and descriptions.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "name",
+                "operator",
+                "type",
+                "speed",
+                "capacity",
+                "power"
+              ],
+              "default": "name"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "asc"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A page of trains and pagination metadata."
+          },
+          "500": {
+            "description": "Unable to retrieve trains."
+          }
+        }
+      }
+    },
     "/api/bookings": {
       "get": {
         "summary": "Retrieve all bookings (Paginated)",
@@ -277,9 +350,74 @@
             "description": "Server error"
           }
         }
+      },
+      "post": {
+        "summary": "Create a new booking",
+        "tags": [
+          "Bookings"
+        ],
+        "security": [
+          {
+            "sessionCookieAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Booking created successfully."
+          },
+          "401": {
+            "description": "Login is required."
+          }
+        }
       }
     },
     "/api/bookings/{bookingCode}": {
+      "get": {
+        "summary": "Retrieve a single booking by bookingCode",
+        "tags": [
+          "Bookings"
+        ],
+        "security": [
+          {
+            "sessionCookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "bookingCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The unique booking code"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Booking details retrieved successfully"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Forbidden (customer accessing another user's booking)"
+          },
+          "404": {
+            "description": "Booking not found"
+          }
+        }
+      },
       "put": {
         "summary": "Update a booking owned by the signed-in user (or any booking as an admin)",
         "tags": [
