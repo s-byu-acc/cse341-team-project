@@ -367,9 +367,74 @@
             "description": "Server error"
           }
         }
+      },
+      "post": {
+        "summary": "Create a new booking",
+        "tags": [
+          "Bookings"
+        ],
+        "security": [
+          {
+            "sessionCookieAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Booking created successfully."
+          },
+          "401": {
+            "description": "Login is required."
+          }
+        }
       }
     },
     "/api/bookings/{bookingCode}": {
+      "get": {
+        "summary": "Retrieve a single booking by bookingCode",
+        "tags": [
+          "Bookings"
+        ],
+        "security": [
+          {
+            "sessionCookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "bookingCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The unique booking code"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Booking details retrieved successfully"
+          },
+          "401": {
+            "description": "Login required"
+          },
+          "403": {
+            "description": "Forbidden (customer accessing another user's booking)"
+          },
+          "404": {
+            "description": "Booking not found"
+          }
+        }
+      },
       "put": {
         "summary": "Update a booking owned by the signed-in user (or any booking as an admin)",
         "tags": [
